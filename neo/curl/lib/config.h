@@ -404,7 +404,7 @@
 /* #undef NEED_REENTRANT */
 
 /* cpu-machine-OS */
-#define OS "i686-pc-linux-gnu"
+#define OS "x86_64-unknown-linux-gnu"
 
 /* Name of package */
 #define PACKAGE "curl"
@@ -465,7 +465,7 @@
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#define _FILE_OFFSET_BITS 64
+/* #undef _FILE_OFFSET_BITS */
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */

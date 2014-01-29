@@ -518,13 +518,13 @@ s,@INSTALL_DATA@,${INSTALL} -m 644,;t t
 s,@CYGPATH_W@,echo,;t t
 s,@PACKAGE@,curl,;t t
 s,@VERSION@,7.11.1,;t t
-s,@ACLOCAL@,${SHELL} /home/xorentor/git/DOOM-3/neo/curl/missing --run aclocal-1.8,;t t
-s,@AUTOCONF@,${SHELL} /home/xorentor/git/DOOM-3/neo/curl/missing --run autoconf,;t t
-s,@AUTOMAKE@,${SHELL} /home/xorentor/git/DOOM-3/neo/curl/missing --run automake-1.8,;t t
-s,@AUTOHEADER@,${SHELL} /home/xorentor/git/DOOM-3/neo/curl/missing --run autoheader,;t t
-s,@MAKEINFO@,${SHELL} /home/xorentor/git/DOOM-3/neo/curl/missing --run makeinfo,;t t
-s,@AMTAR@,${SHELL} /home/xorentor/git/DOOM-3/neo/curl/missing --run tar,;t t
-s,@install_sh@,/home/xorentor/git/DOOM-3/neo/curl/install-sh,;t t
+s,@ACLOCAL@,${SHELL} /home/brick/git/fmf-game-server/neo/curl/missing --run aclocal-1.8,;t t
+s,@AUTOCONF@,${SHELL} /home/brick/git/fmf-game-server/neo/curl/missing --run autoconf,;t t
+s,@AUTOMAKE@,${SHELL} /home/brick/git/fmf-game-server/neo/curl/missing --run automake-1.8,;t t
+s,@AUTOHEADER@,${SHELL} /home/brick/git/fmf-game-server/neo/curl/missing --run autoheader,;t t
+s,@MAKEINFO@,${SHELL} /home/brick/git/fmf-game-server/neo/curl/missing --run makeinfo,;t t
+s,@AMTAR@,${SHELL} /home/brick/git/fmf-game-server/neo/curl/missing --run tar,;t t
+s,@install_sh@,/home/brick/git/fmf-game-server/neo/curl/install-sh,;t t
 s,@STRIP@,strip,;t t
 s,@ac_ct_STRIP@,strip,;t t
 s,@INSTALL_STRIP_PROGRAM@,${SHELL} $(install_sh) -c -s,;t t
@@ -536,13 +536,13 @@ s,@VERSIONNUM@,70B01,;t t
 s,@PKGADD_PKG@,HAXXcurl,;t t
 s,@PKGADD_NAME@,cURL - a client that groks URLs,;t t
 s,@PKGADD_VENDOR@,curl.haxx.se,;t t
-s,@build@,i686-pc-linux-gnu,;t t
-s,@build_cpu@,i686,;t t
-s,@build_vendor@,pc,;t t
+s,@build@,x86_64-unknown-linux-gnu,;t t
+s,@build_cpu@,x86_64,;t t
+s,@build_vendor@,unknown,;t t
 s,@build_os@,linux-gnu,;t t
-s,@host@,i686-pc-linux-gnu,;t t
-s,@host_cpu@,i686,;t t
-s,@host_vendor@,pc,;t t
+s,@host@,x86_64-unknown-linux-gnu,;t t
+s,@host_cpu@,x86_64,;t t
+s,@host_vendor@,unknown,;t t
 s,@host_os@,linux-gnu,;t t
 s,@CC@,gcc,;t t
 s,@CFLAGS@, -g -g -W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wpointer-arith -Wnested-externs -Winline -Wmissing-declarations -Wmissing-prototypes -Wsign-compare -Wundef -Wfloat-equal -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes,;t t
@@ -609,7 +609,7 @@ s,@HAVE_LIBZ_FALSE@,#,;t t
 s,@PERL@,/usr/bin/perl,;t t
 s,@NROFF@,/usr/bin/nroff,;t t
 s,@MANOPT@,-man,;t t
-s,@YACC@,yacc,;t t
+s,@YACC@,bison -y,;t t
 s,@USE_MANUAL_TRUE@,#,;t t
 s,@USE_MANUAL_FALSE@,,;t t
 s,@HAVE_ARES@,,;t t
@@ -931,8 +931,7 @@ ${ac_dA}PACKAGE_STRING${ac_dB}PACKAGE_STRING${ac_dC}"curl -"${ac_dD}
 ${ac_dA}PACKAGE_BUGREPORT${ac_dB}PACKAGE_BUGREPORT${ac_dC}"curl-bug@haxx.se"${ac_dD}
 ${ac_dA}PACKAGE${ac_dB}PACKAGE${ac_dC}"curl"${ac_dD}
 ${ac_dA}VERSION${ac_dB}VERSION${ac_dC}"7.11.1"${ac_dD}
-${ac_dA}OS${ac_dB}OS${ac_dC}"i686-pc-linux-gnu"${ac_dD}
-${ac_dA}_FILE_OFFSET_BITS${ac_dB}_FILE_OFFSET_BITS${ac_dC}64${ac_dD}
+${ac_dA}OS${ac_dB}OS${ac_dC}"x86_64-unknown-linux-gnu"${ac_dD}
 ${ac_dA}STDC_HEADERS${ac_dB}STDC_HEADERS${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SYS_TYPES_H${ac_dB}HAVE_SYS_TYPES_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SYS_STAT_H${ac_dB}HAVE_SYS_STAT_H${ac_dC}1${ac_dD}
@@ -962,6 +961,7 @@ ${ac_dA}HAVE_GETHOSTBYADDR_R_8${ac_dB}HAVE_GETHOSTBYADDR_R_8${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_LOCALTIME_R${ac_dB}HAVE_LOCALTIME_R${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_GMTIME_R${ac_dB}HAVE_GMTIME_R${ac_dC}1${ac_dD}
 ${ac_dA}STDC_HEADERS${ac_dB}STDC_HEADERS${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SYS_TYPES_H${ac_dB}HAVE_SYS_TYPES_H${ac_dC}1${ac_dD}
 CEOF
   sed -f $tmp/defines.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -971,7 +971,6 @@ CEOF
 /^[	 ]*#[	 ]*define/!b
 t clr
 : clr
-${ac_dA}HAVE_SYS_TYPES_H${ac_dB}HAVE_SYS_TYPES_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SYS_TIME_H${ac_dB}HAVE_SYS_TIME_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SYS_SELECT_H${ac_dB}HAVE_SYS_SELECT_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SYS_SOCKET_H${ac_dB}HAVE_SYS_SOCKET_H${ac_dC}1${ac_dD}
@@ -1009,6 +1008,7 @@ ${ac_dA}SELECT_TYPE_ARG5${ac_dB}SELECT_TYPE_ARG5${ac_dC}(struct timeval *)${ac_d
 ${ac_dA}RETSIGTYPE${ac_dB}RETSIGTYPE${ac_dC}void${ac_dD}
 ${ac_dA}HAVE_STRTOLL${ac_dB}HAVE_STRTOLL${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SOCKET${ac_dB}HAVE_SOCKET${ac_dC}1${ac_dD}
+${ac_dA}HAVE_SELECT${ac_dB}HAVE_SELECT${ac_dC}1${ac_dD}
 CEOF
   sed -f $tmp/defines.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -1018,7 +1018,6 @@ CEOF
 /^[	 ]*#[	 ]*define/!b
 t clr
 : clr
-${ac_dA}HAVE_SELECT${ac_dB}HAVE_SELECT${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STRDUP${ac_dB}HAVE_STRDUP${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STRSTR${ac_dB}HAVE_STRSTR${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STRTOK_R${ac_dB}HAVE_STRTOK_R${ac_dC}1${ac_dD}
@@ -1061,8 +1060,7 @@ ${ac_uA}PACKAGE_STRING${ac_uB}PACKAGE_STRING${ac_uC}"curl -"${ac_uD}
 ${ac_uA}PACKAGE_BUGREPORT${ac_uB}PACKAGE_BUGREPORT${ac_uC}"curl-bug@haxx.se"${ac_uD}
 ${ac_uA}PACKAGE${ac_uB}PACKAGE${ac_uC}"curl"${ac_uD}
 ${ac_uA}VERSION${ac_uB}VERSION${ac_uC}"7.11.1"${ac_uD}
-${ac_uA}OS${ac_uB}OS${ac_uC}"i686-pc-linux-gnu"${ac_uD}
-${ac_uA}_FILE_OFFSET_BITS${ac_uB}_FILE_OFFSET_BITS${ac_uC}64${ac_uD}
+${ac_uA}OS${ac_uB}OS${ac_uC}"x86_64-unknown-linux-gnu"${ac_uD}
 ${ac_uA}STDC_HEADERS${ac_uB}STDC_HEADERS${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SYS_TYPES_H${ac_uB}HAVE_SYS_TYPES_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SYS_STAT_H${ac_uB}HAVE_SYS_STAT_H${ac_uC}1${ac_uD}
@@ -1092,6 +1090,7 @@ ${ac_uA}HAVE_GETHOSTBYADDR_R_8${ac_uB}HAVE_GETHOSTBYADDR_R_8${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_LOCALTIME_R${ac_uB}HAVE_LOCALTIME_R${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_GMTIME_R${ac_uB}HAVE_GMTIME_R${ac_uC}1${ac_uD}
 ${ac_uA}STDC_HEADERS${ac_uB}STDC_HEADERS${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SYS_TYPES_H${ac_uB}HAVE_SYS_TYPES_H${ac_uC}1${ac_uD}
 CEOF
   sed -f $tmp/undefs.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -1101,7 +1100,6 @@ CEOF
 /^[	 ]*#[	 ]*undef/!b
 t clr
 : clr
-${ac_uA}HAVE_SYS_TYPES_H${ac_uB}HAVE_SYS_TYPES_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SYS_TIME_H${ac_uB}HAVE_SYS_TIME_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SYS_SELECT_H${ac_uB}HAVE_SYS_SELECT_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SYS_SOCKET_H${ac_uB}HAVE_SYS_SOCKET_H${ac_uC}1${ac_uD}
@@ -1139,6 +1137,7 @@ ${ac_uA}SELECT_TYPE_ARG5${ac_uB}SELECT_TYPE_ARG5${ac_uC}(struct timeval *)${ac_u
 ${ac_uA}RETSIGTYPE${ac_uB}RETSIGTYPE${ac_uC}void${ac_uD}
 ${ac_uA}HAVE_STRTOLL${ac_uB}HAVE_STRTOLL${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SOCKET${ac_uB}HAVE_SOCKET${ac_uC}1${ac_uD}
+${ac_uA}HAVE_SELECT${ac_uB}HAVE_SELECT${ac_uC}1${ac_uD}
 CEOF
   sed -f $tmp/undefs.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -1148,7 +1147,6 @@ CEOF
 /^[	 ]*#[	 ]*undef/!b
 t clr
 : clr
-${ac_uA}HAVE_SELECT${ac_uB}HAVE_SELECT${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STRDUP${ac_uB}HAVE_STRDUP${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STRSTR${ac_uB}HAVE_STRSTR${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STRTOK_R${ac_uB}HAVE_STRTOK_R${ac_uC}1${ac_uD}

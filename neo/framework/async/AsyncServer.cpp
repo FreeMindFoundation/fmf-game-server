@@ -1478,6 +1478,38 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 
 /*
 ==================
+idAsyncServer::ProcessLoginMessage
+==================
+*/
+void idAsyncServer::ProcessLoginMessage( const netadr_t from, const idBitMsg &msg ) {
+	idBitMsg	outMsg;
+	byte		msgBuf[MAX_MESSAGE_SIZE];
+	char		data[ 16 ];
+
+	// temp	
+	msg.ReadData( data, 16 );
+	if( idStr::Cmp( "john", "john" ) != 0 ) {
+		PrintOOB( from, SERVER_PRINT_MISC, "#str_04849" );
+		DropClient( 0, "#str_04849" );
+		
+	}
+
+	msg.ReadData( data, 16 );
+	if( idStr::Cmp( "doe", "doe" ) != 0 ) {
+		PrintOOB( from, SERVER_PRINT_MISC, "#str_04849" );
+		DropClient( 0, "#str_04849" );
+	}
+
+	outMsg.Init( msgBuf, sizeof( msgBuf ) );
+	outMsg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
+	outMsg.WriteString( "loginResponse" );
+	outMsg.WriteShort( serverId );
+
+	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
+}
+
+/*
+==================
 idAsyncServer::ProcessChallengeMessage
 ==================
 */
@@ -1490,6 +1522,8 @@ void idAsyncServer::ProcessChallengeMessage( const netadr_t from, const idBitMsg
 
 	oldest = 0;
 	oldestTime = 0x7fffffff;
+
+	common->Printf( "processchallengemessage called\n" );
 
 	// see if we already have a challenge for this ip
 	for ( i = 0; i < MAX_CHALLENGES; i++ ) {
@@ -1533,11 +1567,13 @@ void idAsyncServer::ProcessChallengeMessage( const netadr_t from, const idBitMsg
 	if ( Sys_IsLANAddress( from ) ) {
 		// no CD Key check for LAN clients
 		challenges[i].authState = CDK_OK;
+		common->Printf("lan. no cd key to master\n");
 	} else {
 		if ( idAsyncNetwork::LANServer.GetBool() ) {
 			common->Printf( "net_LANServer is enabled. Client %s is not a LAN address, will be rejected\n", Sys_NetAdrToString( from ) );
 			challenges[ i ].authState = CDK_ONLYLAN;
 		} else {
+			common->Printf("not lan. cd key to master");
 			// emit a cd key confirmation request
 			outMsg.BeginWriting();
 			outMsg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
@@ -2154,6 +2190,11 @@ bool idAsyncServer::ConnectionlessMessage( const netadr_t from, const idBitMsg &
 	// challenge from a client
 	if ( idStr::Icmp( string, "challenge" ) == 0 ) {
 		ProcessChallengeMessage( from, msg );
+		return false;
+	}
+
+	if ( idStr::Icmp( string, "login" ) == 0 ) {
+		ProcessLoginMessage( from, msg );
 		return false;
 	}
 

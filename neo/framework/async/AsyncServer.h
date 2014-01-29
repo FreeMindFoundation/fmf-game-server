@@ -238,6 +238,7 @@ private:
 	void				ProcessUnreliableClientMessage( int clientNum, const idBitMsg &msg );
 	void				ProcessReliableClientMessages( int clientNum );
 	void				ProcessChallengeMessage( const netadr_t from, const idBitMsg &msg );
+	void				ProcessLoginMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessConnectMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessRemoteConsoleMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessGetInfoMessage( const netadr_t from, const idBitMsg &msg );
