@@ -70,6 +70,7 @@ idAsyncServer::idAsyncServer( void ) {
 	int i;
 
 	active = false;
+	logins = NULL;
 	realTime = 0;
 	serverTime = 0;
 	serverId = 0;
@@ -188,6 +189,8 @@ void idAsyncServer::Spawn( void ) {
 	serverId = Sys_Milliseconds() & CONNECTIONLESS_MESSAGE_ID_MASK;
 
 	active = true;
+
+	logins = NULL;
 
 	nextHeartbeatTime = 0;
 	nextAsyncStatsTime = 0;
@@ -1481,30 +1484,42 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 idAsyncServer::ProcessLoginMessage
 ==================
 */
+#define CMPCRED( d, t )\
+	msg.ReadData( d, 16 );\
+	t = d;\
+	for( ; *t == 0x20; t++ );
 void idAsyncServer::ProcessLoginMessage( const netadr_t from, const idBitMsg &msg ) {
 	idBitMsg	outMsg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
-	char		data[ 16 ];
-
-	// temp	
-	msg.ReadData( data, 16 );
-	if( idStr::Cmp( "john", "john" ) != 0 ) {
-		PrintOOB( from, SERVER_PRINT_MISC, "#str_04849" );
-		DropClient( 0, "#str_04849" );
-		
-	}
-
-	msg.ReadData( data, 16 );
-	if( idStr::Cmp( "doe", "doe" ) != 0 ) {
-		PrintOOB( from, SERVER_PRINT_MISC, "#str_04849" );
-		DropClient( 0, "#str_04849" );
-	}
+	char		duser[ 16 ], dpass[ 16 ];
+	char		*user, *pass;
+	logininfo_t	*li;
+	pool_t 		*p;
+	pe_t 		*e;
 
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
-	outMsg.WriteString( "loginResponse" );
-	outMsg.WriteShort( serverId );
 
+	CMPCRED( duser, user );
+	CMPCRED( dpass, pass );
+
+	if( db_verifyUserHash( user, pass ) != 0 ) {
+		outMsg.WriteString( "print" );
+		outMsg.WriteLong( SERVER_PRINT_GAMEDENY );
+		outMsg.WriteLong( 0 );
+		outMsg.WriteString( "incorrect login details" ); 
+		goto send;
+	}
+
+	POOL_G( p, sizeof( logininfo_t ), 0, e, li );
+	li->loginId = Sys_Milliseconds();
+	li->addr = from;
+	LL_ADD( logins, li );
+
+	outMsg.WriteString( "loginResponse" );
+	outMsg.WriteLong( li->loginId );
+		
+send:
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 }
 
@@ -1701,6 +1716,29 @@ int idAsyncServer::ValidateChallenge( const netadr_t from, int challenge, int cl
 	return i;
 }
 
+int idAsyncServer::ValidateLogin( const netadr_t from, const int loginId ) { 
+	int 		i;
+	logininfo_t	*li;
+
+	for( li = logins; li != NULL; li = li->next ) {
+		if( li->loginId != loginId ) {
+			continue;
+		}		
+
+		for( i = 0; i < 4; i++ ) {
+			if( li->addr.ip[ i ] != from.ip[ i ] ) {
+				goto next;
+			}
+		}
+		
+		return 0;		
+
+		next:;
+	}
+
+	return -1;
+}
+
 /*
 ==================
 idAsyncServer::ProcessConnectMessage
@@ -1713,6 +1751,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	char		guid[ 12 ];
 	char		password[ 17 ];
 	int			i, ichallenge, islot, OS, numClients;
+	int 		loginId;
 
 	protocol = msg.ReadLong();
 	OS = msg.ReadShort();
@@ -1727,8 +1766,14 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	clientDataChecksum = msg.ReadLong();
 	challenge = msg.ReadLong();
 	clientId = msg.ReadShort();
+	loginId = msg.ReadLong();
 	clientRate = msg.ReadLong();
 
+	if( ValidateLogin( from, loginId ) != 0 ) {
+		PrintOOB( from, SERVER_PRINT_MISC, "incorrect login details" );
+		return;
+	}
+	
 	// check the client data - only for non pure servers
 	if ( !sessLocal.mapSpawnData.serverInfo.GetInt( "si_pure" ) && clientDataChecksum != serverDataChecksum ) {
 		PrintOOB( from, SERVER_PRINT_MISC, "#str_04842" );

@@ -91,6 +91,13 @@ typedef struct challenge_s {
 	int					OS;
 } challenge_t;
 
+typedef struct logininfo_s {
+	pe_t *pe;
+	struct logininfo_s *next;
+	int loginId;
+	netadr_t addr;
+} logininfo_t;
+
 typedef enum {
 	SCS_FREE,			// can be reused for a new connection
 	SCS_ZOMBIE,			// client has been disconnected, but don't reuse connection for a couple seconds
@@ -191,6 +198,8 @@ private:
 	serverClient_t		clients[MAX_ASYNC_CLIENTS];	// clients
 	usercmd_t			userCmds[MAX_USERCMD_BACKUP][MAX_ASYNC_CLIENTS];
 
+	logininfo_t				*logins;
+
 	int					gameInitId;					// game initialization identification
 	int					gameFrame;					// local game frame
 	int					gameTime;					// local game time
@@ -238,6 +247,7 @@ private:
 	void				ProcessUnreliableClientMessage( int clientNum, const idBitMsg &msg );
 	void				ProcessReliableClientMessages( int clientNum );
 	void				ProcessChallengeMessage( const netadr_t from, const idBitMsg &msg );
+	int 				ValidateLogin( const netadr_t from, const int loginId );
 	void				ProcessLoginMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessConnectMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessRemoteConsoleMessage( const netadr_t from, const idBitMsg &msg );

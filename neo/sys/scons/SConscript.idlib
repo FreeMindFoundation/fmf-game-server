@@ -50,7 +50,10 @@ idlib_string = ' \
 	Token.cpp \
 	Base64.cpp \
 	Timer.cpp \
-	Heap.cpp'
+	Heap.cpp \
+	SHA256.cpp \
+	Filedb.cpp \
+	Pool.cpp'
 
 idlib_list = scons_utils.BuildList( 'idlib', idlib_string )
 
@@ -59,12 +62,15 @@ for i in range( len( idlib_list ) ):
 
 local_env = g_env.Clone()
 local_env_noopt = g_env.Clone()
+local_env.Append( CPPFLAGS=['-lpthread'] )
+
+libraries = ['pthread']
 
 # max allowed -O1
 flags = OPTCPPFLAGS
 try:
 	flags.remove( '-O3' )
-	flags.insert( 0, '-O1' )
+	flags.insert( 0, '-O1')
 except:
 	pass
 local_env_noopt.Append( CPPFLAGS = flags )

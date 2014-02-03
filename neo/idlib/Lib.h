@@ -168,6 +168,7 @@ template<class T> ID_INLINE T	Min( T x, T y ) { return ( x < y ) ? x : y; }
 
 // memory management and arrays
 #include "Heap.h"
+#include "Pool.h"
 #include "containers/List.h"
 
 // math
@@ -221,6 +222,7 @@ template<class T> ID_INLINE T	Min( T x, T y ) { return ( x < y ) ? x : y; }
 #include "containers/HashTable.h"
 #include "containers/StaticList.h"
 #include "containers/LinkList.h"
+#include "containers/LinkListM.h"
 #include "containers/Hierarchy.h"
 #include "containers/Queue.h"
 #include "containers/Stack.h"
@@ -240,5 +242,7 @@ template<class T> ID_INLINE T	Min( T x, T y ) { return ( x < y ) ? x : y; }
 #include "BitMsg.h"
 #include "MapFile.h"
 #include "Timer.h"
+#include "SHA256.h"
+#include "Filedb.h"
 
 #endif	/* !__LIB_H__ */

@@ -189,6 +189,7 @@ private:
 	void				InitGame( int serverGameInitId, int serverGameFrame, int serverGameTime, const idDict &serverSI );
 	void				ProcessUnreliableServerMessage( const idBitMsg &msg );
 	void				ProcessReliableServerMessages( void );
+
 	void				ProcessChallengeResponseMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessConnectResponseMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessDisconnectMessage( const netadr_t from, const idBitMsg &msg );

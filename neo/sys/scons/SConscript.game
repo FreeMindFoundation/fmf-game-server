@@ -92,6 +92,8 @@ for i in range( len( game_list ) ):
 	game_list[ i ] = '../../' + game_list[ i ]
 
 local_env = g_game_env.Clone()
+local_env.Append( CPPFLAGS=['-lpthread'] )
+
 if ( local_d3xp ):
 	local_env.Append( CPPDEFINES = [ '_D3XP', 'CTF' ] )
 

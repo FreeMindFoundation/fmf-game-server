@@ -165,7 +165,7 @@ BUILD = 'debug'
 DEDICATED = '1'
 TARGET_CORE = '1'
 TARGET_GAME = '1'
-TARGET_D3XP = '1'
+TARGET_D3XP = '0'
 TARGET_MONO = '0'
 TARGET_DEMO = '0'
 IDNET_HOST = ''
@@ -236,7 +236,7 @@ if ( SETUP != '0' ):
 if ( g_sdk or SDK != '0' ):
 	TARGET_CORE = '0'
 	TARGET_GAME = '1'
-	TARGET_D3XP = '1'
+	TARGET_D3XP = '0'
 	TARGET_MONO = '0'
 	TARGET_DEMO = '0'
 
@@ -289,12 +289,16 @@ BASECPPFLAGS.append( '-fmessage-length=0' )
 # gcc 4.0
 BASECPPFLAGS.append( '-fpermissive' )
 
+
 if ( g_os == 'Linux' ):
 	# gcc 4.x option only - only export what we mean to from the game SO
 	BASECPPFLAGS.append( '-fvisibility=hidden' )
 	# get the 64 bits machine on the distcc array to produce 32 bit binaries :)
 	BASECPPFLAGS.append( '-m32' )
 	BASELINKFLAGS.append( '-m32' )
+	BASECPPFLAGS.append( '-lpthread' )
+	BASELINKFLAGS.append( '-lpthread' )
+	BASECPPFLAGS.append( '-pipe' )
 
 if ( g_sdk or SDK != '0' ):
 	BASECPPFLAGS.append( '-D_D3SDK' )

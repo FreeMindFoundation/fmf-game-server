@@ -306,6 +306,7 @@ for i in range( len( ogg_list ) ):
 	ogg_list[ i ] = '../../' + ogg_list[ i ]
 
 local_env = g_env.Clone()
+local_env.Append( CPPFLAGS=['-lpthread'] )
 
 if ( local_dedicated == 1 ):
 	local_env.Append( CPPDEFINES = [ 'ID_DEDICATED', 'ID_GL_HARDLINK' ] )
