@@ -190,8 +190,6 @@ void idAsyncServer::Spawn( void ) {
 
 	active = true;
 
-	logins = NULL;
-
 	nextHeartbeatTime = 0;
 	nextAsyncStatsTime = 0;
 
@@ -1484,7 +1482,7 @@ void idAsyncServer::ProcessAuthMessage( const idBitMsg &msg ) {
 idAsyncServer::ProcessLoginMessage
 ==================
 */
-#define CMPCRED( d, t )\
+#define GETCRED( d, t )\
 	msg.ReadData( d, 16 );\
 	t = d;\
 	for( ; *t == 0x20; t++ );
@@ -1496,14 +1494,15 @@ void idAsyncServer::ProcessLoginMessage( const netadr_t from, const idBitMsg &ms
 	logininfo_t	*li;
 	pool_t 		*p;
 	pe_t 		*e;
-
+	int 		r;
+	
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
 
-	CMPCRED( duser, user );
-	CMPCRED( dpass, pass );
+	GETCRED( duser, user );
+	GETCRED( dpass, pass );
 
-	if( db_verifyUserHash( user, pass ) != 0 ) {
+	if( (r=db_verifyUserHash( user, pass )) != 0 ) {
 		outMsg.WriteString( "print" );
 		outMsg.WriteLong( SERVER_PRINT_GAMEDENY );
 		outMsg.WriteLong( 0 );
@@ -1514,7 +1513,8 @@ void idAsyncServer::ProcessLoginMessage( const netadr_t from, const idBitMsg &ms
 	POOL_G( p, sizeof( logininfo_t ), 0, e, li );
 	li->loginId = Sys_Milliseconds();
 	li->addr = from;
-	LL_ADD( logins, li );
+	
+	LL_ADD_AT( (void *)&logins, li );
 
 	outMsg.WriteString( "loginResponse" );
 	outMsg.WriteLong( li->loginId );
@@ -1720,7 +1720,11 @@ int idAsyncServer::ValidateLogin( const netadr_t from, const int loginId ) {
 	int 		i;
 	logininfo_t	*li;
 
+	common->Printf( "loginid: %d\n", loginId );
+
 	for( li = logins; li != NULL; li = li->next ) {
+
+		common->Printf( "testing loginid: %d\n", loginId );
 		if( li->loginId != loginId ) {
 			continue;
 		}		

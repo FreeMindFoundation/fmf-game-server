@@ -3,7 +3,7 @@
 
 static long lSize;
 static pthread_mutex_t filemutex = PTHREAD_MUTEX_INITIALIZER;
-#define FILE_DB		"~/.fmf_dusers"
+#define FILE_DB		"/home/brick/.dusers"
 
 #define ERR_RET( msg )\
 	pthread_mutex_unlock( &filemutex );\
@@ -130,15 +130,20 @@ void db_hashPass( const char *pass, unsigned char *buffer )
 
 char db_createUser( const char *username, const char *password )
 {
-	if( strlen( username ) > 32 || strlen( password ) > 32 )
+	int userId, userLen, passLen;	
+	User_t *user;
+   	unsigned char hashpass[ SHA256_LEN ];
+		
+	userId = 0;
+	userLen = strlen( username );
+	passLen = strlen( password );
+	memset( hashpass, 0, sizeof( hashpass ) );
+
+	if( userLen < 1 || userLen > USER_MAX || passLen < 1 || passLen > SHA256_LEN )
 		return DB_ERR_CREATE_LENGTH;
 	
 	if( userExists( username ) )
 		return DB_ERR_CREATE_EXISTS;
-
-   	unsigned char hashpass[ 32 ];
-	int userId = 0;	
-	User_t *user;
 
 	db_hashPass( password, hashpass );
 
@@ -147,8 +152,8 @@ char db_createUser( const char *username, const char *password )
 	memset( user, 0, sizeof( User_t ) );
 	user->userId = userId;
 	memcpy( user->username, username, strlen( username ) );
-	memcpy( user->userpass, hashpass, sizeof( hashpass ) );
-	user->flags = USER_ISACTIVE;
+	memcpy( user->userpass, hashpass, SHA256_LEN );
+	user->flags = 0;
 	addUser( user );
 	free( user );
 		
@@ -159,9 +164,17 @@ static inline int getPosByUser( const char *username, char *buffer )
 {
 	User_t *u;
 	u = (User_t *)buffer;
+	unsigned int i;
+	int userLen;
 
-	for( int i = 0; i < lSize; i += sizeof( User_t ) ) {
-		if( strcmp( u->username + i, username ) == 0 ) {
+	userLen = strlen( username );
+
+	if( userLen < 1 || userLen > USER_MAX ) {
+		return -1;
+	}
+
+	for( i = 0; i < lSize; i += sizeof( User_t ) ) {
+		if( memcmp( u->username + i, username, userLen ) == 0 ) {
 			return i;
 		}
 	}
@@ -215,7 +228,7 @@ static inline void print_hash( const unsigned char* c )
 {
 	int i;
 
-	for( i = 0; i < 32; i++ )
+	for( i = 0; i < SHA256_LEN; i++ )
         	printf( "%X", *c++ );
 
 	printf( "\n" );
@@ -251,7 +264,9 @@ char db_verifyUser( const char *username, unsigned char userpass[] )
 
 char db_verifyUserHash( const char *username, const char *userpass )
 {
-	unsigned char hash[32];
+	unsigned char hash[ SHA256_LEN ];
+
+	memset( hash, 0, sizeof( hash ) );
 
 	db_hashPass( userpass, hash );
 	return ( db_verifyUser( username, hash ) );

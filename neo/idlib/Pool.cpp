@@ -31,7 +31,7 @@ static void *pool_create_block( pool_t *p, int size );
 void pool_freenode( pool_t *p, pe_t *n )
 {
 #ifdef POOL_DEBUG
-		assert( p != NULL );
+	assert( p != NULL );
         assert( n != NULL );
 
         idLib::common->Printf( "releasing a node..\n" );

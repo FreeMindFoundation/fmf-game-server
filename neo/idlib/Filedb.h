@@ -1,11 +1,8 @@
 #ifndef FILEDB_H_
 #define	FILEDB_H_
 
-#define 	SHA256_LEN		32
-
-#define		FILE_USERS		"../db/users"
-#define		USER_ISACTIVE		0x1
-#define		USER_ISPLAYING		0x2
+#define 	SHA256_LEN		64
+#define 	USER_MAX		64
 
 #define		DB_CREATE		0
 #define		DB_ERR_CREATE_LENGTH	1
@@ -13,9 +10,9 @@
 
 typedef struct User_s
 {
-	int userId;		// keep int32_t for padding
-	char username[32];
-	char userpass[32];
+	int userId;
+	char username[64];
+	char userpass[64];
 	unsigned int flags;
 } User_t;
 

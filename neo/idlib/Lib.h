@@ -88,6 +88,12 @@ class idVec4;
 #define NULL					((void *)0)
 #endif
 
+#ifdef __i386__
+typedef unsigned int ptr;
+#else
+typedef unsigned long long ptr;
+#endif
+
 #ifndef BIT
 #define BIT( num )				( 1 << ( num ) )
 #endif
@@ -222,7 +228,7 @@ template<class T> ID_INLINE T	Min( T x, T y ) { return ( x < y ) ? x : y; }
 #include "containers/HashTable.h"
 #include "containers/StaticList.h"
 #include "containers/LinkList.h"
-#include "containers/LinkListM.h"
+#include "containers/LinkListAt.h"
 #include "containers/Hierarchy.h"
 #include "containers/Queue.h"
 #include "containers/Stack.h"
