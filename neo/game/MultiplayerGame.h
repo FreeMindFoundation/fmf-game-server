@@ -62,6 +62,7 @@ typedef struct mpPlayerState_s {
 	playerVote_t	vote;			// player's vote
 	bool			scoreBoardUp;	// toggle based on player scoreboard button, used to activate de-activate the scoreboard gui
 	bool			ingame;
+	int			userId;
 } mpPlayerState_t;
 
 const int NUM_CHAT_NOTIFY	= 5;
@@ -142,6 +143,8 @@ public:
 	idMultiplayerGame::gameState_t		GetGameState( void ) const;
 
 	static const char *GlobalSoundStrings[ SND_COUNT ];
+
+
 	void			PlayGlobalSound( int to, snd_evt_t evt, const char *shader = NULL );
 
 	// more compact than a chat line
@@ -232,7 +235,9 @@ public:
 	void			ClientReadStartState( const idBitMsg &msg );
 	void			ClientReadWarmupTime( const idBitMsg &msg );
 
-	void			ServerClientConnect( int clientNum );
+	void			ServerClientConnect( int clientNum, int userId );
+	
+	int			GetUserId( int clientNum );
 
 	void			PlayerStats( int clientNum, char *data, const int len );
 
@@ -248,7 +253,6 @@ private:
 	int				pingUpdateTime;			// time to update ping
 
 	mpPlayerState_t	playerState[ MAX_CLIENTS ];
-
 											// keep track of clients which are willingly in spectator mode
 
 	// vote vars

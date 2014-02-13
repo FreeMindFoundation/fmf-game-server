@@ -328,7 +328,8 @@ void idAsyncServer::ExecuteMapChange( void ) {
 	for ( i = 0; i < MAX_ASYNC_CLIENTS; i++ ) {
 		if ( clients[i].clientState >= SCS_PUREWAIT && i != localClientNum ) {
 
-			InitClient( i, clients[i].clientId, clients[i].clientRate );
+			// FIXME: wrong userId 99
+			InitClient( i, clients[i].clientId, clients[i].clientRate, 99 );
 
 			SendGameInitToClient( i );
 
@@ -662,7 +663,7 @@ void idAsyncServer::ClearClient( int clientNum ) {
 idAsyncServer::InitClient
 ==================
 */
-void idAsyncServer::InitClient( int clientNum, int clientId, int clientRate ) {
+void idAsyncServer::InitClient( int clientNum, int clientId, int clientRate, int userId ) {
 	int i;
 
 	// clear the user info
@@ -696,7 +697,7 @@ void idAsyncServer::InitClient( int clientNum, int clientId, int clientRate ) {
 	}
 
 	// let the game know a player connected
-	game->ServerClientConnect( clientNum, client.guid );
+	game->ServerClientConnect( clientNum, client.guid, userId );
 }
 
 /*
@@ -708,7 +709,7 @@ void idAsyncServer::InitLocalClient( int clientNum ) {
 	netadr_t badAddress;
 
 	localClientNum = clientNum;
-	InitClient( clientNum, 0, 0 );
+	InitClient( clientNum, 0, 0, 99 );
 	memset( &badAddress, 0, sizeof( badAddress ) );
 	badAddress.type = NA_BAD;
 	clients[clientNum].channel.Init( badAddress, serverId );
@@ -1489,20 +1490,22 @@ idAsyncServer::ProcessLoginMessage
 void idAsyncServer::ProcessLoginMessage( const netadr_t from, const idBitMsg &msg ) {
 	idBitMsg	outMsg;
 	byte		msgBuf[MAX_MESSAGE_SIZE];
-	char		duser[ 16 ], dpass[ 16 ];
+	char		duser[ 17 ], dpass[ 17 ];
 	char		*user, *pass;
 	logininfo_t	*li;
 	pool_t 		*p;
 	pe_t 		*e;
-	int 		r;
-	
+	int 		userId;	
+
+	memset( duser, 0, sizeof( duser ) );
+	memset( dpass, 0, sizeof( dpass ) );
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );
 	outMsg.WriteShort( CONNECTIONLESS_MESSAGE_ID );
 
 	GETCRED( duser, user );
 	GETCRED( dpass, pass );
 
-	if( (r=db_verifyUserHash( user, pass )) != 0 ) {
+	if( db_verifyUserHash( user, pass, &userId ) != 0 ) {
 		outMsg.WriteString( "print" );
 		outMsg.WriteLong( SERVER_PRINT_GAMEDENY );
 		outMsg.WriteLong( 0 );
@@ -1513,6 +1516,7 @@ void idAsyncServer::ProcessLoginMessage( const netadr_t from, const idBitMsg &ms
 	POOL_G( p, sizeof( logininfo_t ), 0, e, li );
 	li->loginId = Sys_Milliseconds();
 	li->addr = from;
+	li->userId = userId;
 	
 	LL_ADD_AT( (void *)&logins, li );
 
@@ -1716,15 +1720,11 @@ int idAsyncServer::ValidateChallenge( const netadr_t from, int challenge, int cl
 	return i;
 }
 
-int idAsyncServer::ValidateLogin( const netadr_t from, const int loginId ) { 
+int idAsyncServer::ValidateLogin( const netadr_t from, const int loginId, int *userId ) { 
 	int 		i;
 	logininfo_t	*li;
 
-	common->Printf( "loginid: %d\n", loginId );
-
 	for( li = logins; li != NULL; li = li->next ) {
-
-		common->Printf( "testing loginid: %d\n", loginId );
 		if( li->loginId != loginId ) {
 			continue;
 		}		
@@ -1734,7 +1734,8 @@ int idAsyncServer::ValidateLogin( const netadr_t from, const int loginId ) {
 				goto next;
 			}
 		}
-		
+
+		*userId = li->userId;
 		return 0;		
 
 		next:;
@@ -1756,6 +1757,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	char		password[ 17 ];
 	int			i, ichallenge, islot, OS, numClients;
 	int 		loginId;
+	int		userId;
 
 	protocol = msg.ReadLong();
 	OS = msg.ReadShort();
@@ -1773,7 +1775,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 	loginId = msg.ReadLong();
 	clientRate = msg.ReadLong();
 
-	if( ValidateLogin( from, loginId ) != 0 ) {
+	if( ValidateLogin( from, loginId, &userId ) != 0 ) {
 		PrintOOB( from, SERVER_PRINT_MISC, "incorrect login details" );
 		return;
 	}
@@ -1929,6 +1931,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 			clients[ clientNum ].OS = OS;
 			strncpy( clients[ clientNum ].guid, guid, 12 );
 			clients[ clientNum ].guid[11] = 0;
+			clients[ clientNum ].userId = userId;
 			break;
 		}
 	}
@@ -1953,7 +1956,7 @@ void idAsyncServer::ProcessConnectMessage( const netadr_t from, const idBitMsg &
 
 	serverPort.SendPacket( from, outMsg.GetData(), outMsg.GetSize() );
 	
-	InitClient( clientNum, clientId, clientRate );
+	InitClient( clientNum, clientId, clientRate, userId );
 
 	clients[clientNum].gameInitSequence = 1;
 	clients[clientNum].snapshotSequence = 1;

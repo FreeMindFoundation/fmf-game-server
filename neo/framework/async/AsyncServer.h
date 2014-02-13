@@ -96,6 +96,7 @@ typedef struct logininfo_s {
 	struct logininfo_s *next;
 	int loginId;
 	netadr_t addr;
+	int userId;
 } logininfo_t;
 
 typedef enum {
@@ -131,7 +132,8 @@ typedef struct serverClient_s {
 	int					numDuplicatedUsercmds;
 
 	char				guid[12];  // Even Balance - M. Quinn
-
+	
+	int				userId;
 } serverClient_t;
 
 
@@ -228,7 +230,7 @@ private:
 	void				PrintOOB( const netadr_t to, int opcode, const char *string );
 	void				DuplicateUsercmds( int frame, int time );
 	void				ClearClient( int clientNum );
-	void				InitClient( int clientNum, int clientId, int clientRate );
+	void				InitClient( int clientNum, int clientId, int clientRate, int userId );
 	void				InitLocalClient( int clientNum );
 	void				BeginLocalClient( void );
 	void				LocalClientInput( void );
@@ -247,7 +249,7 @@ private:
 	void				ProcessUnreliableClientMessage( int clientNum, const idBitMsg &msg );
 	void				ProcessReliableClientMessages( int clientNum );
 	void				ProcessChallengeMessage( const netadr_t from, const idBitMsg &msg );
-	int 				ValidateLogin( const netadr_t from, const int loginId );
+	int 				ValidateLogin( const netadr_t from, const int loginId, int *userId );
 	void				ProcessLoginMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessConnectMessage( const netadr_t from, const idBitMsg &msg );
 	void				ProcessRemoteConsoleMessage( const netadr_t from, const idBitMsg &msg );

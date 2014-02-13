@@ -287,14 +287,15 @@ allowReply_t idGameLocal::ServerAllowClient( int numClients, const char *IP, con
 idGameLocal::ServerClientConnect
 ================
 */
-void idGameLocal::ServerClientConnect( int clientNum, const char *guid ) {
+void idGameLocal::ServerClientConnect( int clientNum, const char *guid, int userId ) {
 	// make sure no parasite entity is left
 	if ( entities[ clientNum ] ) {
 		common->DPrintf( "ServerClientConnect: remove old player entity\n" );
 		delete entities[ clientNum ];
 	}
 	userInfo[ clientNum ].Clear();
-	mpGame.ServerClientConnect( clientNum );
+	userIds[ clientNum ] = userId;
+	mpGame.ServerClientConnect( clientNum, userId );
 	Printf( "client %d connected.\n", clientNum );
 }
 
@@ -829,6 +830,15 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 			break;
 		}
 #endif
+		case GAME_RELIABLE_MESSAGE_TERMINAL:
+			char 	cmd[ 128 ];
+
+			msg.ReadString( cmd, sizeof( cmd ) );
+			//common->Printf( "process rel msg: %d %d\n", clientNum, game->mpGame.playerState[ clientNum ].userId );
+			//terminal_cmd( clientNum, cmd, NULL );
+			//common->Printf( "process rel %d\n", userIds[ clientNum ] );
+			common->Printf( "serverprocreliablemsg clientnum:%d userId:%d userIds: %d\n", clientNum, gameLocal.mpGame.GetUserId( clientNum ), gameLocal.userIds[ clientNum ] );
+			break;
 		case GAME_RELIABLE_MESSAGE_EVENT: {
 			entityNetEvent_t *event;
 

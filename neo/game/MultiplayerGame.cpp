@@ -174,13 +174,22 @@ void idMultiplayerGame::Reset() {
 	warmupEndTime = 0;
 }
 
+
+int idMultiplayerGame::GetUserId( int clientNum ) {
+	common->Printf( "get user id by clientnum %d ping %d userId: %d\n", clientNum, playerState[ clientNum ].ping, playerState[ clientNum].userId );
+	return playerState[ clientNum ].userId;
+}
+
+
 /*
 ================
 idMultiplayerGame::ServerClientConnect
 ================
 */
-void idMultiplayerGame::ServerClientConnect( int clientNum ) {
+void idMultiplayerGame::ServerClientConnect( int clientNum, int userId ) {
 	memset( &playerState[ clientNum ], 0, sizeof( playerState[ clientNum ] ) );
+	playerState[ clientNum ].userId = userId;
+	common->Printf( "serverclientconn.. clientNum: %d userid: %d %d\n", clientNum, userId, playerState[ clientNum ].userId );
 }
 
 /*
@@ -226,7 +235,7 @@ void idMultiplayerGame::Clear() {
 	currentTourneyPlayer[ 0 ] = -1;
 	currentTourneyPlayer[ 1 ] = -1;
 	one = two = three = false;
-	memset( &playerState, 0 , sizeof( playerState ) );
+	//memset( &playerState, 0 , sizeof( playerState ) );
 	lastWinner = -1;
 	currentMenu = 0;
 	bCurrentMenuMsg = false;
@@ -2982,6 +2991,8 @@ void idMultiplayerGame::ProcessChatMessage( int clientNum, bool team, const char
 	idStr		prefixed_name;
 
 	assert( !gameLocal.isClient );
+
+	common->Printf( "test [%s]\n", text );
 
 	if ( clientNum >= 0 ) {
 		p = static_cast< idPlayer * >( gameLocal.entities[ clientNum ] );

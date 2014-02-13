@@ -105,9 +105,10 @@ static inline char userExists( const char *username )
 static inline int getNextID()
 {
 	char *buffer;
-	buffer = readFile();
 	int userId = 0;	
 	User_t *u;
+
+	buffer = readFile();
 
 	if( buffer == NULL ) {
 		return userId;
@@ -182,6 +183,29 @@ static inline int getPosByUser( const char *username, char *buffer )
 	return -1;
 }
 
+int db_getUserId( const char *username )
+{
+	if( strlen( username ) < 1 )
+		return -1;
+
+	int pos;
+	User_t *u;
+	char *buffer;
+	int uid = -1;
+
+	buffer = readFile();
+	pos = getPosByUser( username, buffer );	
+	if( pos == -1 ) {
+		printf("user not found\n");
+		return uid;
+	}
+	u = (User_t *)( buffer + pos );
+	uid = u->userId;
+
+	free( buffer );
+	return uid;
+}
+
 int db_getUserFlag( const char *username, const int flag )
 {
 	if( strlen( username ) < 1 )
@@ -234,7 +258,7 @@ static inline void print_hash( const unsigned char* c )
 	printf( "\n" );
 }
 
-char db_verifyUser( const char *username, unsigned char userpass[] )
+char db_verifyUser( const char *username, unsigned char userpass[], int *userId )
 {
 	int pos;
 	User_t *u;
@@ -243,31 +267,34 @@ char db_verifyUser( const char *username, unsigned char userpass[] )
 
 	r = -1;
 
-	if( strlen( username ) < 1 )
-		return -1;
+	if( strlen( username ) < 1 ) {
+		return r;
+	}
 
 	buffer = readFile();
-	if( buffer == NULL )
+	if( buffer == NULL ) {
 		return r;
-	
+	}	
+
 	pos = getPosByUser( username, buffer );	
 	u = (User_t *)( buffer + pos );
 	
 	if( memcmp( u->userpass, userpass, SHA256_LEN ) == 0 ) {
 		r = 0;
 	}	
-
+	*userId = u->userId;
+	printf( "userid: %d\n", *userId );
 	free( buffer );
 	
 	return r;
 }
 
-char db_verifyUserHash( const char *username, const char *userpass )
+char db_verifyUserHash( const char *username, const char *userpass, int *userId )
 {
 	unsigned char hash[ SHA256_LEN ];
 
 	memset( hash, 0, sizeof( hash ) );
 
 	db_hashPass( userpass, hash );
-	return ( db_verifyUser( username, hash ) );
+	return ( db_verifyUser( username, hash, userId ) );
 }

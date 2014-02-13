@@ -19,8 +19,9 @@ typedef struct User_s
 char 		db_createUser( const char *username, const char *password );
 int 		db_getUserFlag( const char *username, const int flag );
 void 		db_setUserFlag( const char *username, const int value );
-char 		db_verifyUser( const char *username, unsigned char userpass[] );
+int 		db_getUserId( const char *username, const int value );
+char 		db_verifyUser( const char *username, unsigned char userpass[], int *userId );
 void		db_hashPass( const char *pass, unsigned char *buffer );
-char 		db_verifyUserHash( const char *username, const char *userpass );
+char 		db_verifyUserHash( const char *username, const char *userpass, int *userId );
 
 #endif

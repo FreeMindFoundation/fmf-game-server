@@ -166,7 +166,8 @@ enum {
 	GAME_RELIABLE_MESSAGE_STARTSTATE,
 	GAME_RELIABLE_MESSAGE_MENU,
 	GAME_RELIABLE_MESSAGE_WARMUPTIME,
-	GAME_RELIABLE_MESSAGE_EVENT
+	GAME_RELIABLE_MESSAGE_EVENT,
+	GAME_RELIABLE_MESSAGE_TERMINAL
 };
 
 typedef enum {
@@ -243,6 +244,8 @@ class idGameLocal : public idGame {
 public:
 	idDict					serverInfo;				// all the tunable parameters, like numclients, etc
 	int						numClients;				// pulled from serverInfo and verified
+	int userIds[ MAX_CLIENTS ];
+
 	idDict					userInfo[MAX_CLIENTS];	// client specific settings
 	usercmd_t				usercmds[MAX_CLIENTS];	// client input commands
 	idDict					persistentPlayerInfo[MAX_CLIENTS];
@@ -340,7 +343,7 @@ public:
 	virtual const char *	HandleGuiCommands( const char *menuCommand );
 	virtual void			HandleMainMenuCommands( const char *menuCommand, idUserInterface *gui );
 	virtual allowReply_t	ServerAllowClient( int numClients, const char *IP, const char *guid, const char *password, char reason[MAX_STRING_CHARS] );
-	virtual void			ServerClientConnect( int clientNum, const char *guid );
+	virtual void			ServerClientConnect( int clientNum, const char *guid, int userId );
 	virtual void			ServerClientBegin( int clientNum );
 	virtual void			ServerClientDisconnect( int clientNum );
 	virtual void			ServerWriteInitialReliableMessages( int clientNum );
@@ -732,6 +735,7 @@ const int	CINEMATIC_SKIP_DELAY	= SEC2MS( 2.0f );
 #include "Fx.h"
 #include "SecurityCamera.h"
 #include "BrittleFracture.h"
+#include "Terminal.h"
 
 #include "ai/AI.h"
 #include "anim/Anim_Testmodel.h"
