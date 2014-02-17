@@ -27,6 +27,7 @@ game_string = ' \
 	Mover.cpp \
 	Moveable.cpp \
 	MultiplayerGame.cpp \
+	Terminal.cpp \
 	Player.cpp \
 	PlayerIcon.cpp \
 	PlayerView.cpp \

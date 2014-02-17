@@ -834,10 +834,7 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 			char 	cmd[ 128 ];
 
 			msg.ReadString( cmd, sizeof( cmd ) );
-			//common->Printf( "process rel msg: %d %d\n", clientNum, game->mpGame.playerState[ clientNum ].userId );
-			//terminal_cmd( clientNum, cmd, NULL );
-			//common->Printf( "process rel %d\n", userIds[ clientNum ] );
-			common->Printf( "serverprocreliablemsg clientnum:%d userId:%d userIds: %d\n", clientNum, gameLocal.mpGame.GetUserId( clientNum ), gameLocal.userIds[ clientNum ] );
+			terminal_cmd( clientNum, cmd );
 			break;
 		case GAME_RELIABLE_MESSAGE_EVENT: {
 			entityNetEvent_t *event;
