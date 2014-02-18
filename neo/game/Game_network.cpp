@@ -832,9 +832,11 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 #endif
 		case GAME_RELIABLE_MESSAGE_TERMINAL:
 			char 	cmd[ 128 ];
+			int 	type;
 
+			type = msg.ReadShort();
 			msg.ReadString( cmd, sizeof( cmd ) );
-			terminal_cmd( clientNum, cmd );
+			terminal_cmd( clientNum, cmd, type );
 			break;
 		case GAME_RELIABLE_MESSAGE_EVENT: {
 			entityNetEvent_t *event;
