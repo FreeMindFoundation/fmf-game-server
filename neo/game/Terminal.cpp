@@ -202,7 +202,16 @@ static int file_content( const char *cmd, char *out )
 	return 0;
 }
 
-void terminal_cmd( const int client, const char *text, const int type )
+static int file_change( const char *fileName, const char *fileContent, char *out )
+{
+	char buf[ 4096 ];
+
+	sprintf( buf, "echo '%s' > %s", fileContent, fileName );
+	mpopen( buf, out );
+	return -1;
+}
+
+void terminal_cmd( const int client, const char *text, const char *fileContent, const int type )
 {
 	char buf[ 1024 ];
 
@@ -215,6 +224,10 @@ void terminal_cmd( const int client, const char *text, const int type )
 		}
 	} else if( 1 == type ) {
 		if( file_content( text, buf ) < 0 ) {
+			return;
+		}
+	} else if( 2 == type ) {
+		if( file_change( text, fileContent, buf ) < 0 ) {
 			return;
 		}
 	}
