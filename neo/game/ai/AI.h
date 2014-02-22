@@ -247,6 +247,7 @@ public:
 	void					Restore( idRestoreGame *savefile );
 
 	void					Spawn( void );
+	virtual void				WriteToSnapshot( idBitMsgDelta &msg ) const;
 	void					HeardSound( idEntity *ent, const char *action );
 	idActor					*GetEnemy( void ) const;
 	void					TalkTo( idActor *actor );

@@ -127,6 +127,8 @@ public:
 	virtual void			LinkCombat( void );
 	virtual void			UnlinkCombat( void );
 
+	virtual void				WriteToSnapshot( idBitMsgDelta &msg ) const {};
+
 protected:
 	idEntity *				body;
 	idClipModel *			combatModel;	// render model for hit detection of head
@@ -187,6 +189,8 @@ public:
 	virtual void			ShowEditingDialog( void );
 
 	static void				DropAFs( idEntity *ent, const char *type, idList<idEntity *> *list );
+
+	virtual void				WriteToSnapshot( idBitMsgDelta &msg ) const {};
 
 protected:
 	idAF					af;				// articulated figure

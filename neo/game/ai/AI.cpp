@@ -136,8 +136,10 @@ idAASFindCover::idAASFindCover
 idAASFindCover::idAASFindCover( const idVec3 &hideFromPos ) {
 	int			numPVSAreas;
 	idBounds	bounds( hideFromPos - idVec3( 16, 16, 0 ), hideFromPos + idVec3( 16, 16, 64 ) );
-
+	common->Printf( "idAASFindCover\n" );
 	// setup PVS
+	//
+	common->Printf( "idAASFindCover\n" );
 	numPVSAreas = gameLocal.pvs.GetPVSAreas( bounds, PVSAreas, idEntity::MAX_PVS_AREAS );
 	hidePVS		= gameLocal.pvs.SetupCurrentPVS( PVSAreas, numPVSAreas );
 }
@@ -164,6 +166,7 @@ bool idAASFindCover::TestArea( const idAAS *aas, int areaNum ) {
 	areaCenter = aas->AreaCenter( areaNum );
 	areaCenter[ 2 ] += 1.0f;
 
+	common->Printf( "TestArea\n" );
 	numPVSAreas = gameLocal.pvs.GetPVSAreas( idBounds( areaCenter ).Expand( 16.0f ), PVSAreas, idEntity::MAX_PVS_AREAS );
 	if ( !gameLocal.pvs.InCurrentPVS( hidePVS, PVSAreas, numPVSAreas ) ) {
 		return true;
@@ -223,6 +226,7 @@ idAASFindAttackPosition::idAASFindAttackPosition( const idAI *self, const idMat3
 	excludeBounds		= idBounds( idVec3( -64.0, -64.0f, -8.0f ), idVec3( 64.0, 64.0f, 64.0f ) );
 	excludeBounds.TranslateSelf( self->GetPhysics()->GetOrigin() );	
 
+	common->Printf( "idAASFindAttackPosition\n" );
 	// setup PVS
 	idBounds bounds( targetPos - idVec3( 16, 16, 0 ), targetPos + idVec3( 16, 16, 64 ) );
 	numPVSAreas = gameLocal.pvs.GetPVSAreas( bounds, PVSAreas, idEntity::MAX_PVS_AREAS );
@@ -260,6 +264,7 @@ bool idAASFindAttackPosition::TestArea( const idAAS *aas, int areaNum ) {
 		return false;
 	}
 
+	common->Printf( "TestArea\n" );
 	numPVSAreas = gameLocal.pvs.GetPVSAreas( idBounds( areaCenter ).Expand( 16.0f ), PVSAreas, idEntity::MAX_PVS_AREAS );
 	if ( !gameLocal.pvs.InCurrentPVS( targetPVS, PVSAreas, numPVSAreas ) ) {
 		return false;
@@ -694,6 +699,94 @@ void idAI::Restore( idRestoreGame *savefile ) {
 	if ( restorePhysics ) {
 		RestorePhysics( &physicsObj );
 	}
+}
+
+void idAI::WriteToSnapshot( idBitMsgDelta &msg ) const {
+	physicsObj.WriteToSnapshot( msg );
+	WriteBindToSnapshot( msg );
+	msg.WriteDeltaFloat( 0.0f, deltaViewAngles[0] );
+	msg.WriteDeltaFloat( 0.0f, deltaViewAngles[1] );
+	msg.WriteDeltaFloat( 0.0f, deltaViewAngles[2] );
+	msg.WriteShort( health );
+	
+	// idMoveState
+	msg.WriteLong( move.moveType );
+	msg.WriteLong( move.moveCommand );
+	msg.WriteLong( move.moveStatus );
+	msg.WriteFloat( move.moveDest[0] );
+	msg.WriteFloat( move.moveDest[1] );
+	msg.WriteFloat( move.moveDest[2] );
+	msg.WriteFloat( move.moveDir[0] );
+	msg.WriteFloat( move.moveDir[1] );
+	msg.WriteFloat( move.moveDir[2] );
+	msg.WriteFloat( move.goalEntityOrigin[0] );
+	msg.WriteFloat( move.goalEntityOrigin[1] );
+	msg.WriteFloat( move.goalEntityOrigin[2] );
+	
+	msg.WriteLong( move.toAreaNum );
+	msg.WriteLong( move.startTime );
+	msg.WriteLong( move.duration );
+
+	msg.WriteFloat( move.speed );
+	msg.WriteFloat( move.range );
+	msg.WriteFloat( move.wanderYaw );
+
+	msg.WriteLong( move.nextWanderTime );
+	msg.WriteLong( move.blockTime );
+
+	msg.WriteFloat( move.lastMoveOrigin[0] );
+	msg.WriteFloat( move.lastMoveOrigin[1] );
+	msg.WriteFloat( move.lastMoveOrigin[2] );
+
+	msg.WriteLong( move.lastMoveTime );
+	msg.WriteLong( move.anim );
+	
+	// idAI
+	
+	msg.WriteLong( travelFlags );
+
+	msg.WriteFloat( kickForce );
+	msg.WriteLong( ignore_obstacles );
+	msg.WriteFloat( blockedRadius );
+	msg.WriteLong( blockedMoveTime );
+	msg.WriteLong( blockedAttackTime );
+
+	
+	msg.WriteFloat( ideal_yaw );
+	msg.WriteFloat( current_yaw );
+	msg.WriteFloat( turnRate );
+	msg.WriteFloat( turnVel );
+	msg.WriteFloat( anim_turn_yaw );
+	msg.WriteFloat( anim_turn_amount );
+	msg.WriteFloat( anim_turn_angles );
+
+	// ...
+	
+	msg.WriteLong( allowMove );
+	msg.WriteLong( allowHiddenMovement );
+	msg.WriteLong( disableGravity );
+
+	msg.WriteLong( lastHitCheckResult );
+	msg.WriteLong( lastHitCheckTime );
+	msg.WriteLong( lastAttackTime );
+
+	msg.WriteFloat( melee_range );
+	msg.WriteFloat( projectile_height_to_distance_ratio );
+
+	msg.WriteLong( num_cinematics );
+	msg.WriteLong( current_cinematic );
+
+	// idEntity
+	
+	msg.WriteLong( entityNumber );
+	msg.WriteLong( entityDefNumber );
+	msg.WriteLong( snapshotSequence );
+	msg.WriteLong( snapshotBits );
+	msg.WriteLong( thinkFlags );
+	msg.WriteLong( cinematic );
+
+	msg.WriteString( attack.c_str() );
+
 }
 
 /*
@@ -2296,6 +2389,8 @@ bool idAI::EntityCanSeePos( idActor *actor, const idVec3 &actorOrigin, const idV
 	trace_t results;
 	pvsHandle_t handle;
 
+
+	common->Printf( "EntityCanSeePos\n" );
 	handle = gameLocal.pvs.SetupCurrentPVS( actor->GetPVSAreas(), actor->GetNumPVSAreas() );
 
 	if ( !gameLocal.pvs.InCurrentPVS( handle, GetPVSAreas(), GetNumPVSAreas() ) ) {

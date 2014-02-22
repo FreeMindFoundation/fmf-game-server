@@ -394,6 +394,10 @@ idEntity::idEntity() {
 	snapshotSequence = -1;
 	snapshotBits = 0;
 
+	renderEntity.origin[0] = 0;
+	renderEntity.origin[1] = 0;
+	renderEntity.origin[2] = 0;
+
 	thinkFlags		= 0;
 	dormantStart	= 0;
 	cinematic		= false;
@@ -1233,6 +1237,15 @@ void idEntity::UpdatePVSAreas( void ) {
 	int localNumPVSAreas, localPVSAreas[32];
 	idBounds modelAbsBounds;
 	int i;
+	
+	/*
+	if( isnan(renderEntity.origin[ 0 ]) ) {
+		renderEntity.origin[ 0 ] = 50.0f; }
+        if( isnan(renderEntity.origin[ 1 ]) ) {
+                renderEntity.origin[ 1 ] = 50.0f; }
+	*/
+
+	//common->Printf( "UpdatePVSAreas :%f :%f :%f axis: %f %f %f\n", renderEntity.origin[ 0 ], renderEntity.origin[ 1 ], renderEntity.origin[ 2 ], renderEntity.axis[ 0 ], renderEntity.axis[ 1 ],renderEntity.axis[ 2 ]);
 
 	modelAbsBounds.FromTransformedBounds( renderEntity.bounds, renderEntity.origin, renderEntity.axis );
 	localNumPVSAreas = gameLocal.pvs.GetPVSAreas( modelAbsBounds, localPVSAreas, sizeof( localPVSAreas ) / sizeof( localPVSAreas[0] ) );
@@ -1260,6 +1273,7 @@ idEntity::UpdatePVSAreas
 void idEntity::UpdatePVSAreas( const idVec3 &pos ) {
 	int i;
 
+	common->Printf( "UpdatePVSAreas 2\n" );
 	numPVSAreas = gameLocal.pvs.GetPVSAreas( idBounds( pos ), PVSAreas, MAX_PVS_AREAS );
 	i = numPVSAreas;
 	while ( i < MAX_PVS_AREAS ) {

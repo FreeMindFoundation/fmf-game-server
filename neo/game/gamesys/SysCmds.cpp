@@ -98,14 +98,18 @@ Cmd_ActiveEntityList_f
 void Cmd_ActiveEntityList_f( const idCmdArgs &args ) {
 	idEntity	*check;
 	int			count;
+	idVec3		origin;
 
 	count = 0;
 
-	gameLocal.Printf( "%-4s  %-20s %-20s %s\n", " Num", "EntityDef", "Class", "Name" );
+	gameLocal.Printf( "%-4s  %-20s %-20s %-20s %s\n", " Num", "EntityDef", "Class", "Position", "Name" );
 	gameLocal.Printf( "--------------------------------------------------------------------\n" );
 	for( check = gameLocal.activeEntities.Next(); check != NULL; check = check->activeNode.Next() ) {
 		char	dormant = check->fl.isDormant ? '-' : ' ';
-		gameLocal.Printf( "%4i:%c%-20s %-20s %s\n", check->entityNumber, dormant, check->GetEntityDefName(), check->GetClassname(), check->name.c_str() );
+		/*gameLocal.Printf( "%4i:%c%-20s %-20s %s\n", check->entityNumber, dormant, check->GetEntityDefName(), check->GetClassname(), check->name.c_str() );
+*/
+		origin = check->GetPhysics()->GetOrigin();
+		gameLocal.Printf( "%4i:%c%-20s %-20s %-20s %s\n", check->entityNumber, dormant, check->GetEntityDefName(), check->GetClassname(), va( "%f %f %f %d", origin[0], origin[1], origin[2], check->fl.networkSync), check->name.c_str() );
 		count++;
 	}
 
@@ -771,40 +775,29 @@ Cmd_Spawn_f
 ===================
 */
 void Cmd_Spawn_f( const idCmdArgs &args ) {
-	const char *key, *value;
+  const char *key, *value;
 	int			i;
 	float		yaw;
 	idVec3		org;
 	idPlayer	*player;
 	idDict		dict;
-
-	player = gameLocal.GetLocalPlayer();
-	if ( !player || !gameLocal.CheatsOk( false ) ) {
-		return;
-	}
-
-	if ( args.Argc() & 1 ) {	// must always have an even number of arguments
-		gameLocal.Printf( "usage: spawn classname [key/value pairs]\n" );
-		return;
-	}
-
-	yaw = player->viewAngles.yaw;
+	idStr		position;
+	const char 	*angle = "10.00000";
 
 	value = args.Argv( 1 );
+	position = args.Argv( 2 );
+	position += " ";
+	position += args.Argv( 3 );
+	position += " ";
+	position += args.Argv( 4 );
+	
 	dict.Set( "classname", value );
-	dict.Set( "angle", va( "%f", yaw + 180 ) );
+	//dict.Set( "angle", va( "%f", 0 + 180 ) );
+	dict.Set( "angle", angle );
 
-	org = player->GetPhysics()->GetOrigin() + idAngles( 0, yaw, 0 ).ToForward() * 80 + idVec3( 0, 0, 1 );
-	dict.Set( "origin", org.ToString() );
-
-	for( i = 2; i < args.Argc() - 1; i += 2 ) {
-
-		key = args.Argv( i );
-		value = args.Argv( i + 1 );
-
-		dict.Set( key, value );
-	}
-
+	dict.Set( "networkSync", "1" );
+	//org = player->GetPhysics()->GetOrigin() + idAngles( 0, yaw, 0 ).ToForward() * 80 + idVec3( 0, 0, 1 );
+	dict.Set( "origin", position.c_str() );
 	gameLocal.SpawnEntityDef( dict );
 }
 
@@ -2299,9 +2292,9 @@ void idGameLocal::InitConsoleCommands( void ) {
 	cmdSystem->AddCommand( "listClasses",			idClass::ListClasses_f,		CMD_FL_GAME,				"lists game classes" );
 	cmdSystem->AddCommand( "listThreads",			idThread::ListThreads_f,	CMD_FL_GAME|CMD_FL_CHEAT,	"lists script threads" );
 	cmdSystem->AddCommand( "listEntities",			Cmd_EntityList_f,			CMD_FL_GAME|CMD_FL_CHEAT,	"lists game entities" );
-	cmdSystem->AddCommand( "listActiveEntities",	Cmd_ActiveEntityList_f,		CMD_FL_GAME|CMD_FL_CHEAT,	"lists active game entities" );
+	cmdSystem->AddCommand( "listActiveEntities",	Cmd_ActiveEntityList_f,		CMD_FL_GAME,	"lists active game entities" );
 	cmdSystem->AddCommand( "listMonsters",			idAI::List_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"lists monsters" );
-	cmdSystem->AddCommand( "listSpawnArgs",			Cmd_ListSpawnArgs_f,		CMD_FL_GAME|CMD_FL_CHEAT,	"list the spawn args of an entity", idGameLocal::ArgCompletion_EntityName );
+	cmdSystem->AddCommand( "listSpawnArgs",			Cmd_ListSpawnArgs_f,		CMD_FL_GAME,	"list the spawn args of an entity", idGameLocal::ArgCompletion_EntityName );
 	cmdSystem->AddCommand( "say",					Cmd_Say_f,					CMD_FL_GAME,				"text chat" );
 //	cmdSystem->AddCommand( "sayTeam",				Cmd_SayTeam_f,				CMD_FL_GAME,				"team text chat" );
 	cmdSystem->AddCommand( "addChatLine",			Cmd_AddChatLine_f,			CMD_FL_GAME,				"internal use - core to game chat lines" );
@@ -2317,7 +2310,7 @@ void idGameLocal::InitConsoleCommands( void ) {
 	cmdSystem->AddCommand( "setviewpos",			Cmd_SetViewpos_f,			CMD_FL_GAME|CMD_FL_CHEAT,	"sets the current view position" );
 	cmdSystem->AddCommand( "teleport",				Cmd_Teleport_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"teleports the player to an entity location", idGameLocal::ArgCompletion_EntityName );
 	cmdSystem->AddCommand( "trigger",				Cmd_Trigger_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"triggers an entity", idGameLocal::ArgCompletion_EntityName );
-	cmdSystem->AddCommand( "spawn",					Cmd_Spawn_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"spawns a game entity", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF> );
+	cmdSystem->AddCommand( "spawn",					Cmd_Spawn_f,				CMD_FL_GAME,	"spawns a game entity", idCmdSystem::ArgCompletion_Decl<DECL_ENTITYDEF> );
 	cmdSystem->AddCommand( "damage",				Cmd_Damage_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"apply damage to an entity", idGameLocal::ArgCompletion_EntityName );
 	cmdSystem->AddCommand( "remove",				Cmd_Remove_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"removes an entity", idGameLocal::ArgCompletion_EntityName );
 	cmdSystem->AddCommand( "killMonsters",			Cmd_KillMonsters_f,			CMD_FL_GAME|CMD_FL_CHEAT,	"removes all monsters" );

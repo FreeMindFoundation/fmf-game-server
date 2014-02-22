@@ -8032,6 +8032,7 @@ void idPlayer::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 	int		i, oldHealth, newIdealWeapon, weaponSpawnId;
 	bool	newHitToggle, stateHitch;
 
+	common->Printf( "idPlayer::ReadFromSnapshot\n" );
 	if ( snapshotSequence - lastSnapshotSequence > 1 ) {
 		stateHitch = true;
 	} else {

@@ -84,6 +84,8 @@ public:
 	bool					IsIdle( void ) const;
 	animFlags_t				GetAnimFlags( void ) const;
 
+	virtual void				WriteToSnapshot( idBitMsgDelta &msg ) const {};
+
 private:
 	idActor *				self;
 	idAnimator *			animator;
