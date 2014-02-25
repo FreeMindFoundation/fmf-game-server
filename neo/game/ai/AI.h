@@ -271,6 +271,8 @@ public:
 							// Finds the best collision free trajectory for a clip model.
 	static bool				PredictTrajectory( const idVec3 &firePos, const idVec3 &target, float projectileSpeed, const idVec3 &projGravity, const idClipModel *clip, int clipmask, float max_height, const idEntity *ignore, const idEntity *targetEntity, int drawtime, idVec3 &aimDir );
 
+	// FIXME: this should be protected
+	void					Event_Flashlight( const int status );
 protected:
 	// navigation
 	idAAS *					aas;
@@ -413,6 +415,8 @@ protected:
 	idScriptBool			AI_DEST_UNREACHABLE;
 	idScriptBool			AI_HIT_ENEMY;
 	idScriptBool			AI_PUSHED;
+
+	idScriptFloat			AI_FLASHON;
 
 	//
 	// ai/ai.cpp
@@ -658,6 +662,7 @@ protected:
 	void 					Event_CanReachEntity( idEntity *ent );
 	void					Event_CanReachEnemy( void );
 	void					Event_GetReachableEntityPosition( idEntity *ent );
+
 };
 
 class idCombatNode : public idEntity {

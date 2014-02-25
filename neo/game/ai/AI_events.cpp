@@ -313,6 +313,10 @@ void idAI::Event_Touch( idEntity *other, trace_t *trace ) {
 	AI_PUSHED = true;
 }
 
+void idAI::Event_Flashlight( const int status ) {
+	AI_FLASHON = status;
+}
+
 /*
 =====================
 idAI::Event_FindEnemy

@@ -289,7 +289,7 @@ idAI::idAI
 idAI::idAI() {
 	aas					= NULL;
 	travelFlags			= TFL_WALK|TFL_AIR;
-
+	
 	kickForce			= 2048.0f;
 	ignore_obstacles	= false;
 	blockedRadius		= 0.0f;
@@ -703,11 +703,8 @@ void idAI::Restore( idRestoreGame *savefile ) {
 
 void idAI::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	physicsObj.WriteToSnapshot( msg );
-	WriteBindToSnapshot( msg );
-	msg.WriteDeltaFloat( 0.0f, deltaViewAngles[0] );
-	msg.WriteDeltaFloat( 0.0f, deltaViewAngles[1] );
-	msg.WriteDeltaFloat( 0.0f, deltaViewAngles[2] );
-	msg.WriteShort( health );
+	
+	//WriteBindToSnapshot( msg );
 	
 	// idMoveState
 	msg.WriteLong( move.moveType );
@@ -742,11 +739,9 @@ void idAI::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	msg.WriteLong( move.anim );
 	
 	// idAI
-	
 	msg.WriteLong( travelFlags );
-
 	msg.WriteFloat( kickForce );
-	msg.WriteLong( ignore_obstacles );
+	msg.WriteByte( ignore_obstacles );
 	msg.WriteFloat( blockedRadius );
 	msg.WriteLong( blockedMoveTime );
 	msg.WriteLong( blockedAttackTime );
@@ -760,33 +755,112 @@ void idAI::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	msg.WriteFloat( anim_turn_amount );
 	msg.WriteFloat( anim_turn_angles );
 
-	// ...
-	
+	// flying stuff ignored for now
+
 	msg.WriteLong( allowMove );
 	msg.WriteLong( allowHiddenMovement );
 	msg.WriteLong( disableGravity );
+	msg.WriteByte( af_push_moveables );
 
-	msg.WriteLong( lastHitCheckResult );
+	msg.WriteByte( lastHitCheckResult );
 	msg.WriteLong( lastHitCheckTime );
 	msg.WriteLong( lastAttackTime );
-
 	msg.WriteFloat( melee_range );
 	msg.WriteFloat( projectile_height_to_distance_ratio );
 
+	// projectile ignored for now
+	// chatter/talking ignored
+	
 	msg.WriteLong( num_cinematics );
 	msg.WriteLong( current_cinematic );
 
-	// idEntity
+	msg.WriteByte( allowJointMod );
+	msg.WriteFloat( currentFocusPos[0] );
+	msg.WriteFloat( currentFocusPos[1] );
+	msg.WriteFloat( currentFocusPos[2] );
+	msg.WriteLong( focusTime );
+	msg.WriteLong( alignHeadTime );
+	msg.WriteLong( forceAlignHeadTime );
 	
+	msg.WriteFloat( shrivel_rate );
+	msg.WriteLong( shrivel_start );
+	msg.WriteByte( restartParticles );
+	msg.WriteByte( useBoneAxis );
+	
+	msg.WriteLong( worldMuzzleFlashHandle );
+	msg.WriteLong( muzzleFlashEnd );
+	msg.WriteLong( flashTime );
+
+	// idActor
+	msg.WriteLong( team );
+	msg.WriteLong( rank );
+	// viewAxis missing
+	msg.WriteFloat( fovDot );
+	msg.WriteFloat( modelOffset[0] );
+	msg.WriteFloat( modelOffset[1] );
+	msg.WriteFloat( modelOffset[2] );
+	msg.WriteFloat( deltaViewAngles[0] );
+	msg.WriteFloat( deltaViewAngles[1] );
+	msg.WriteFloat( deltaViewAngles[2] );
+	msg.WriteLong( pain_debounce_time );
+	msg.WriteLong( pain_delay );
+	msg.WriteLong( pain_threshold );
+	// maybe add more here
+	msg.WriteByte( allowPain );
+	msg.WriteByte( allowEyeFocus );
+	msg.WriteByte( finalBoss );
+	msg.WriteLong( painTime );
+
+	// idAFEntity
+	msg.WriteLong( combatModelContents );
+	msg.WriteLong( nextSoundTime );
+	
+	// script vars	
+	msg.WriteByte( AI_TALK == true ? 1 : 0 );
+	msg.WriteByte( AI_DAMAGE == true ? 1 : 0 );
+	msg.WriteByte( AI_PAIN == true ? 1 : 0 );
+	msg.WriteByte( AI_DEAD == true ? 1 : 0 );
+	msg.WriteByte( AI_ENEMY_VISIBLE == true ? 1 : 0 );
+	msg.WriteByte( AI_ENEMY_IN_FOV == true ? 1 : 0 );
+	msg.WriteByte( AI_ENEMY_DEAD == true ? 1 : 0 );
+	msg.WriteByte( AI_MOVE_DONE == true ? 1 : 0 ); 
+	msg.WriteByte( AI_ONGROUND == true ? 1 : 0 );
+	msg.WriteByte( AI_ACTIVATED == true ? 1 : 0 );
+	msg.WriteByte( AI_FORWARD == true ? 1 : 0 );
+	msg.WriteByte( AI_JUMP == true ? 1 : 0 ); 
+	//msg.WriteByte( AI_ENEMY_REACHABLE == true ? 1 : 0 ); 
+	msg.WriteByte( AI_BLOCKED == true ? 1 : 0 );
+	msg.WriteByte( AI_OBSTACLE_IN_PATH == true ? 1 : 0 );
+	msg.WriteByte( AI_DEST_UNREACHABLE == true ? 1 : 0 );
+	msg.WriteByte( AI_HIT_ENEMY == true ? 1 : 0 );
+	msg.WriteByte( AI_PUSHED == true ? 1 : 0 );
+	msg.WriteByte( 1 == AI_FLASHON ? 1 : 0 );
+	//msg.WriteFloat( AI_SPECIAL_DAMAGE );
+
+
+	// idEntity
 	msg.WriteLong( entityNumber );
 	msg.WriteLong( entityDefNumber );
 	msg.WriteLong( snapshotSequence );
 	msg.WriteLong( snapshotBits );
 	msg.WriteLong( thinkFlags );
 	msg.WriteLong( cinematic );
+	msg.WriteShort( health );
 
-	msg.WriteString( attack.c_str() );
+	msg.WriteByte( fl.notarget );
+	msg.WriteByte( fl.noknockback );
+	msg.WriteByte( fl.takedamage );
+	msg.WriteByte( fl.hidden );
+	msg.WriteByte( fl.bindOrientated );
+	msg.WriteByte( fl.solidForTeam );
+	msg.WriteByte( fl.forcePhysicsUpdate );
+	msg.WriteByte( fl.selected );
+	msg.WriteByte( fl.neverDormant );
+	msg.WriteByte( fl.isDormant );
+	msg.WriteByte( fl.hasAwakened );
+	msg.WriteByte( fl.networkSync );
 
+	msg.WriteLong( modelDefHandle );
 }
 
 /*
@@ -1274,6 +1348,7 @@ void idAI::LinkScriptVariables( void ) {
 	AI_HIT_ENEMY.LinkTo(		scriptObject, "AI_HIT_ENEMY" );
 	AI_OBSTACLE_IN_PATH.LinkTo(	scriptObject, "AI_OBSTACLE_IN_PATH" );
 	AI_PUSHED.LinkTo(			scriptObject, "AI_PUSHED" );
+	AI_FLASHON.LinkTo(			scriptObject, "AI_FLASHON" );
 }
 
 /*

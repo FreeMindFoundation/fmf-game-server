@@ -14,6 +14,9 @@
 #define _cd_	0x6463 	// cd
 #define _ls_	0x736c	// ls
 #define _vi_	0x6976	// vi
+#define _ry_	0x7972	// ry
+#define _spaw_	0x77617073 // spaw
+#define _sent_	0x746e6573 // sent
 
 #define BUFF_INIT\
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );\
@@ -40,6 +43,7 @@ static byte msgBuf[ MAX_GAME_MESSAGE_SIZE ];
 static int userId;
 static char userDir[ 512 ];
 static int userDirLen;
+static int clientNum;
 
 static void mpopen( const char *cmd, char *out )
 {
@@ -81,10 +85,19 @@ static void create_home( void )
         system( dir );
 }
 
+static idPlayer *get_player()
+{
+	if ( gameLocal.entities[ clientNum ] && gameLocal.entities[ clientNum ]->IsType( idPlayer::Type ) ) {
+		return static_cast< idPlayer * >( gameLocal.entities[ clientNum ] );
+	}
+	return NULL;
+}
+
 static int parse_cmd( char *cmd, char *out )
 {
         char *tmp;
         char buf[ 512 ];
+	idPlayer *player;
 
         memset( buf, 0, sizeof( buf ) );
         create_home();
@@ -128,7 +141,7 @@ static int parse_cmd( char *cmd, char *out )
                 if( *cmd++ != 0x20 ) {
                         return -1;
                 }
-                for( tmp = cmd; *tmp != 0; tmp++ );
+                for( tmp = cmd; *tmp != 0 && ( tmp-cmd ) <= 32; tmp++ );
                 if( tmp == cmd || ( tmp - cmd ) > 32 ) {
                         return -1;
                 }
@@ -157,7 +170,7 @@ static int parse_cmd( char *cmd, char *out )
                 if( *cmd++ != 0x20 ) {
                         return -1;
                 }
-                for( tmp = cmd; *tmp != 0; tmp++ );
+                for( tmp = cmd; *tmp != 0 && ( tmp-cmd ) <= 32; tmp++ );
                 if( tmp == cmd || ( tmp - cmd ) > 32 ) {
                         return -1;
                 }
@@ -183,6 +196,49 @@ static int parse_cmd( char *cmd, char *out )
                 mpopen( buf, out );
 
 		return 0;
+	}
+
+	// spawn %noparam ( so far )
+	if( LOWDW(cmd) == _spaw_ ) {
+		if( *(cmd+4) != 'n' ) {
+			return -1;
+		}
+
+		player = get_player();
+		if( !player ) {
+			return -1;
+		}
+
+		float		yaw;
+		idVec3		org;
+
+		yaw = player->viewAngles.yaw;
+		org = player->GetPhysics()->GetOrigin() + idAngles( 0, yaw, 0 ).ToForward() * 80 + idVec3( 0, 0, 1 );
+		cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "spawn comm1_sentry %s team %d", org.ToString(), userId ) );
+
+		common->Printf( "player team: %d\n", player->team );
+
+		return -1;
+	}
+
+	if( LOWDW(cmd) == _sent_ ) {
+		cmd += 4;
+		if( LOWW(cmd) != _ry_ ) {
+			return -1;
+		}
+
+		idEntity	*ent;
+		idAI		*ai;
+
+		for( ent = gameLocal.activeEntities.Next(); ent != NULL; ent = ent->activeNode.Next() ) {
+			if( memcmp( ent->GetName(), "idAI_comm1_sentry", 17 ) != 0 ) {
+				continue;
+			}
+
+			common->Printf( "found sentry\n" );
+			ai = static_cast<idAI *>(ent);
+			ai->Event_Flashlight( 1 );
+		}
 	}
 
         return -1;
@@ -217,6 +273,7 @@ void terminal_cmd( const int client, const char *text, const char *fileContent, 
 
 	memset( buf, 0, sizeof( buf ) );
 	userId = gameLocal.userIds[ client ];
+	clientNum = client;
 
 	if( 0 == type ) {
 		if( parse_cmd( text, buf ) < 0 ) {
