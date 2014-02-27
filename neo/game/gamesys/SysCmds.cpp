@@ -775,8 +775,8 @@ Cmd_Spawn_f
 ===================
 */
 void Cmd_Spawn_f( const idCmdArgs &args ) {
-  const char *key, *value;
-	int			i;
+  	const char *key, *value;
+	int		i;
 	float		yaw;
 	idVec3		org;
 	idPlayer	*player;
@@ -798,6 +798,14 @@ void Cmd_Spawn_f( const idCmdArgs &args ) {
 	dict.Set( "networkSync", "1" );
 	//org = player->GetPhysics()->GetOrigin() + idAngles( 0, yaw, 0 ).ToForward() * 80 + idVec3( 0, 0, 1 );
 	dict.Set( "origin", position.c_str() );
+
+	for( i = 5; i < args.Argc() - 1; i += 2 ) {
+		key = args.Argv( i );
+		value = args.Argv( i + 1 );
+
+		dict.Set( key, value );
+	}
+
 	gameLocal.SpawnEntityDef( dict );
 }
 
@@ -806,7 +814,7 @@ void Cmd_Spawn_f( const idCmdArgs &args ) {
 Cmd_Damage_f
 
 Damages the specified entity
-==================
+=================
 */
 void Cmd_Damage_f( const idCmdArgs &args ) {
 	if ( !gameLocal.GetLocalPlayer() || !gameLocal.CheatsOk( false ) ) {

@@ -214,9 +214,8 @@ static int parse_cmd( char *cmd, char *out )
 
 		yaw = player->viewAngles.yaw;
 		org = player->GetPhysics()->GetOrigin() + idAngles( 0, yaw, 0 ).ToForward() * 80 + idVec3( 0, 0, 1 );
+		common->Printf( "userId: %d\n", userId );
 		cmdSystem->BufferCommandText( CMD_EXEC_NOW, va( "spawn comm1_sentry %s team %d", org.ToString(), userId ) );
-
-		common->Printf( "player team: %d\n", player->team );
 
 		return -1;
 	}
@@ -229,15 +228,23 @@ static int parse_cmd( char *cmd, char *out )
 
 		idEntity	*ent;
 		idAI		*ai;
+		idActor		*actor;
 
 		for( ent = gameLocal.activeEntities.Next(); ent != NULL; ent = ent->activeNode.Next() ) {
 			if( memcmp( ent->GetName(), "idAI_comm1_sentry", 17 ) != 0 ) {
 				continue;
 			}
+		
+			common->Printf( "found sentry\n" );
+			actor = static_cast<idActor *>(ent);
+			if( actor->team != userId ) {
+				common->Printf( "team != userId; %d %d\n", userId, actor->team );
+				continue;
+			}
 
 			common->Printf( "found sentry\n" );
 			ai = static_cast<idAI *>(ent);
-			ai->Event_Flashlight( 1 );
+			ai->Event_Mov( "f" );
 		}
 	}
 

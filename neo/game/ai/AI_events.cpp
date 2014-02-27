@@ -317,6 +317,16 @@ void idAI::Event_Flashlight( const int status ) {
 	AI_FLASHON = status;
 }
 
+void idAI::Event_Mov( const char *cmd ) {
+	common->Printf( "event_mov\n" );
+	if( memcmp( cmd, "f", 1 ) == 0 )
+		AI_MOV_DIR = 1;
+	else if( memcmp( cmd, "b", 1 ) == 0 ) {
+		AI_MOV_DIR = 2;
+		gameLocal.Printf("back");
+	}
+}
+
 /*
 =====================
 idAI::Event_FindEnemy

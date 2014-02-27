@@ -201,6 +201,7 @@ void idMultiplayerGame::SpawnPlayer( int clientNum ) {
 
 	bool ingame = playerState[ clientNum ].ingame;
 
+	common->Printf( "spawn player mp team: %d\n", gameLocal.userIds[ clientNum ] );
 	memset( &playerState[ clientNum ], 0, sizeof( playerState[ clientNum ] ) );
 	if ( !gameLocal.isClient ) {		
 		idPlayer *p = static_cast< idPlayer * >( gameLocal.entities[ clientNum ] );
@@ -212,6 +213,7 @@ void idMultiplayerGame::SpawnPlayer( int clientNum ) {
 		if ( gameLocal.gameType == GAME_TOURNEY && gameState == GAMEON ) {
 			p->tourneyRank++;
 		}
+		p->team = gameLocal.userIds[ clientNum ];
 		playerState[ clientNum ].ingame = ingame;
 	}
 }

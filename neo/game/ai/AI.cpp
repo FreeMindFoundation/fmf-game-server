@@ -835,6 +835,7 @@ void idAI::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	msg.WriteByte( AI_HIT_ENEMY == true ? 1 : 0 );
 	msg.WriteByte( AI_PUSHED == true ? 1 : 0 );
 	msg.WriteByte( 1 == AI_FLASHON ? 1 : 0 );
+	msg.WriteByte( 1 == AI_MOV_DIR ? 1 : 0 );
 	//msg.WriteFloat( AI_SPECIAL_DAMAGE );
 
 
@@ -1348,6 +1349,8 @@ void idAI::LinkScriptVariables( void ) {
 	AI_HIT_ENEMY.LinkTo(		scriptObject, "AI_HIT_ENEMY" );
 	AI_OBSTACLE_IN_PATH.LinkTo(	scriptObject, "AI_OBSTACLE_IN_PATH" );
 	AI_PUSHED.LinkTo(			scriptObject, "AI_PUSHED" );
+
+	AI_MOV_DIR.LinkTo(			scriptObject, "AI_MOV_DIR" );
 	AI_FLASHON.LinkTo(			scriptObject, "AI_FLASHON" );
 }
 

@@ -273,6 +273,7 @@ public:
 
 	// FIXME: this should be protected
 	void					Event_Flashlight( const int status );
+	void					Event_Mov( const char *cmd );
 protected:
 	// navigation
 	idAAS *					aas;
@@ -416,6 +417,7 @@ protected:
 	idScriptBool			AI_HIT_ENEMY;
 	idScriptBool			AI_PUSHED;
 
+	idScriptFloat			AI_MOV_DIR;
 	idScriptFloat			AI_FLASHON;
 
 	//
