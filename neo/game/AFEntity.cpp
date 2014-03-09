@@ -2511,6 +2511,46 @@ void idAFEntity_ClawFourFingers::Event_StopFingers( void ) {
 }
 
 
+void idAFEntity_ClawFourFingers::WriteToSnapshot( idBitMsgDelta &msg ) const {
+	int i;
+
+	af.GetPhysics()->WriteToSnapshot( msg );
+	WriteBindToSnapshot( msg );
+	WriteColorToSnapshot( msg );
+
+	for ( i = 0; i < 4; i++ ) {
+		msg.WriteFloat( fingers[i]->GetAngle() );
+	}
+	
+	// idEntity
+	msg.WriteLong( entityNumber );
+	msg.WriteLong( entityDefNumber );
+	msg.WriteLong( snapshotSequence );
+	msg.WriteLong( snapshotBits );
+	msg.WriteLong( thinkFlags );
+	msg.WriteLong( cinematic );
+	msg.WriteShort( health );
+
+	// idAFEntity
+	msg.WriteLong( combatModelContents );
+	msg.WriteLong( nextSoundTime );
+
+	msg.WriteByte( fl.notarget );
+	msg.WriteByte( fl.noknockback );
+	msg.WriteByte( fl.takedamage );
+	msg.WriteByte( fl.hidden );
+	msg.WriteByte( fl.bindOrientated );
+	msg.WriteByte( fl.solidForTeam );
+	msg.WriteByte( fl.forcePhysicsUpdate );
+	msg.WriteByte( fl.selected );
+	msg.WriteByte( fl.neverDormant );
+	msg.WriteByte( fl.isDormant );
+	msg.WriteByte( fl.hasAwakened );
+	msg.WriteByte( fl.networkSync );
+	msg.WriteLong( modelDefHandle );
+}
+
+
 /*
 ===============================================================================
 

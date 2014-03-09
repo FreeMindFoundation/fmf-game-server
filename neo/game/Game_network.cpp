@@ -623,6 +623,10 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 
 		deltaMsg.Init( base ? &base->state : NULL, &newBase->state, &msg );
 
+		//idTypeInfo *typeInfo = idClass::GetType( ent->GetType()->typeNum );
+		//const char *classname = declManager->DeclByIndex( DECL_ENTITYDEF, ent->entityDefNumber, false )->GetName();
+		//common->Printf( "entity spawnId %d typenum: %d typeinfo classname [%s]\n", spawnIds[ ent->entityNumber ], ent->GetType()->typeNum, typeInfo->classname );
+
 		deltaMsg.WriteBits( spawnIds[ ent->entityNumber ], 32 - GENTITYNUM_BITS );
 		deltaMsg.WriteBits( ent->GetType()->typeNum, idClass::GetTypeNumBits() );
 		deltaMsg.WriteBits( ServerRemapDecl( -1, DECL_ENTITYDEF, ent->entityDefNumber ), entityDefBits );
@@ -685,6 +689,8 @@ void idGameLocal::ServerWriteSnapshot( int clientNum, int sequence, idBitMsg &ms
 	// copy the client PVS string
 	memcpy( clientInPVS, snapshot->pvs, ( numPVSClients + 7 ) >> 3 );
 	LittleRevBytes( clientInPVS, sizeof( int ), sizeof( clientInPVS ) / sizeof ( int ) );
+
+	//common->Printf( "snapshot size: %d\n", msg.GetSize() );
 }
 
 /*
