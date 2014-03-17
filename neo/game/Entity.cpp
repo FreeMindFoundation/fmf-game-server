@@ -89,6 +89,7 @@ const idEventDef EV_StartSound( "startSound", "sdd", 'f' );
 const idEventDef EV_StopSound( "stopSound", "dd" );
 const idEventDef EV_FadeSound( "fadeSound", "dff" );
 const idEventDef EV_SetGuiParm( "setGuiParm", "ss" );
+const idEventDef EV_GetGuiParm( "getGuiParm", "s", 's' );
 const idEventDef EV_SetGuiFloat( "setGuiFloat", "sf" );
 const idEventDef EV_GetNextKey( "getNextKey", "ss", 's' );
 const idEventDef EV_SetKey( "setKey", "ss" );
@@ -152,6 +153,7 @@ ABSTRACT_DECLARATION( idClass, idEntity )
 	EVENT( EV_GetMaxs,				idEntity::Event_GetMaxs )
 	EVENT( EV_Touches,				idEntity::Event_Touches )
 	EVENT( EV_SetGuiParm, 			idEntity::Event_SetGuiParm )
+	EVENT( EV_GetGuiParm, 			idEntity::Event_GetGuiParm )
 	EVENT( EV_SetGuiFloat, 			idEntity::Event_SetGuiFloat )
 	EVENT( EV_GetNextKey,			idEntity::Event_GetNextKey )
 	EVENT( EV_SetKey,				idEntity::Event_SetKey )
@@ -423,7 +425,9 @@ idEntity::idEntity() {
 	modelDefHandle	= -1;
 	memset( &refSound, 0, sizeof( refSound ) );
 
-	mpGUIState = -1;
+	for( int i = 0; i < MP_GUI_STATES; i++ ) {
+		mpGUIState[ i ] = -1;
+	}
 }
 
 /*
@@ -680,7 +684,9 @@ void idEntity::Save( idSaveGame *savefile ) const {
 		}
 	}
 
-	savefile->WriteInt( mpGUIState );
+	for( i = 0; i < MP_GUI_STATES; i++ ) {
+		savefile->WriteInt( mpGUIState[ i ] );
+	}
 }
 
 /*
@@ -761,7 +767,9 @@ void idEntity::Restore( idRestoreGame *savefile ) {
 		}
 	}
 
-	savefile->ReadInt( mpGUIState );
+	for( i = 0; i < MP_GUI_STATES; i++ ) {
+		savefile->ReadInt( mpGUIState[ i ] );
+	}
 
 	// restore must retrieve modelDefHandle from the renderer
 	if ( modelDefHandle != -1 ) {
@@ -4266,6 +4274,14 @@ void idEntity::Event_SetGuiParm( const char *key, const char *val ) {
 	}
 }
 
+void idEntity::Event_GetGuiParm( const char *key ) {
+	for ( int i = 0; i < MAX_RENDERENTITY_GUI; i++ ) {
+		if ( renderEntity.gui[ i ] ) {
+			idThread::ReturnString( renderEntity.gui[ i ]->GetStateString( key ) );
+		}
+	}
+}
+
 /*
 ================
 idEntity::Event_SetGuiParm
@@ -4685,11 +4701,47 @@ idEntity::WriteGUIToSnapshot
 ================
 */
 void idEntity::WriteGUIToSnapshot( idBitMsgDelta &msg ) const {
+	/*
 	// no need to loop over MAX_RENDERENTITY_GUI at this time
 	if ( renderEntity.gui[ 0 ] ) {
 		msg.WriteByte( renderEntity.gui[ 0 ]->State().GetInt( "networkState" ) );
 	} else {
 		msg.WriteByte( 0 );
+	}
+	*/
+	int i;
+	idStr name;
+	char buffer[ 16 ];
+	int force;
+
+	// every state has an extra byte force flag
+	// no need to loop over MAX_RENDERENTITY_GUI at this time
+	if ( renderEntity.gui[ 0 ] ) {
+		// network states
+		// nsXf forces the gui to handle the state
+		for( i = 0; i < MP_GUI_STATES; i++ ) {
+			// ns0, ns0f, ns1, ...
+			memset( buffer, 0, sizeof( buffer ) );
+			name = "ns";
+			idStr::Itoa( i, buffer, sizeof( buffer ), 10 );
+			name += buffer;	
+			msg.WriteByte( renderEntity.gui[ 0 ]->State().GetInt( name.c_str() ) );
+			//common->Printf( "gui written: %d %s\n", i, name.c_str() );
+
+			name += "f";	// force
+			force = renderEntity.gui[ 0 ]->State().GetInt( name.c_str() );
+			msg.WriteByte( force );
+			if( 1 == force ) {
+				// disable force for the next network frame
+				renderEntity.gui[ 0 ]->SetStateInt( name.c_str(), 0 );
+			}
+			//common->Printf( "gui written: %d %s\n", i, name.c_str() );
+		}
+	} else {
+		for( i = 0; i < MP_GUI_STATES; i++ ) {
+			msg.WriteByte( 0 );
+			msg.WriteByte( 0 );
+		}
 	}
 }
 
@@ -4699,6 +4751,7 @@ idEntity::ReadGUIFromSnapshot
 ================
 */
 void idEntity::ReadGUIFromSnapshot( const idBitMsgDelta &msg ) {
+	/*
 	int state;
 	idUserInterface *gui;
 	state = msg.ReadByte( );
@@ -4707,6 +4760,29 @@ void idEntity::ReadGUIFromSnapshot( const idBitMsgDelta &msg ) {
 		mpGUIState = state;
 		gui->SetStateInt( "networkState", state );
 		gui->HandleNamedEvent( "networkState" );
+	} */
+	int i;
+	idUserInterface *gui;
+	int guiNetStates;
+	int state, force;
+	idStr name;
+
+	guiNetStates = MP_GUI_STATES;
+	gui = renderEntity.gui[ 0 ];
+	
+	if ( gui ) {
+		for( i = 0; i < guiNetStates; i++ ) {
+			state = msg.ReadByte( );
+			force = msg.ReadByte( );
+			name = "ns" + i;
+			if( force == 1 || mpGUIState[ i ] != state ) {
+				//if( force != 1 ) {
+					mpGUIState[ i ] = state;
+					gui->SetStateInt( name.c_str(), state );
+				//}
+				gui->HandleNamedEvent( name.c_str() );
+			}
+		}
 	}
 }
 
