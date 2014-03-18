@@ -5039,7 +5039,7 @@ void idPlayer::UpdateAir( void ) {
 	}
 
 	// see if the player is connected to the info_vacuum
-	bool	newAirless = false;
+	//bool	newAirless = false;
 
 	if ( gameLocal.vacuumAreaNum != -1 ) {
 		int	num = GetNumPVSAreas();
@@ -5060,8 +5060,8 @@ void idPlayer::UpdateAir( void ) {
 
 	if ( newAirless ) {
 		if ( !airless ) {
-			StartSound( "snd_decompress", SND_CHANNEL_ANY, SSF_GLOBAL, false, NULL );
-			StartSound( "snd_noAir", SND_CHANNEL_BODY2, 0, false, NULL );
+			StartSound( "snd_decompress", SND_CHANNEL_ANY, SSF_GLOBAL, true, NULL );
+			StartSound( "snd_noAir", SND_CHANNEL_BODY2, 0, true, NULL );
 			if ( hud ) {
 				hud->HandleNamedEvent( "noAir" );
 			}
@@ -5080,8 +5080,8 @@ void idPlayer::UpdateAir( void ) {
 		
 	} else {
 		if ( airless ) {
-			StartSound( "snd_recompress", SND_CHANNEL_ANY, SSF_GLOBAL, false, NULL );
-			StopSound( SND_CHANNEL_BODY2, false );
+			StartSound( "snd_recompress", SND_CHANNEL_ANY, SSF_GLOBAL, true, NULL );
+			StopSound( SND_CHANNEL_BODY2, true );
 			if ( hud ) {
 				hud->HandleNamedEvent( "Air" );
 			}
@@ -8021,6 +8021,11 @@ void idPlayer::WriteToSnapshot( idBitMsgDelta &msg ) const {
 	msg.WriteBits( weaponGone, 1 );
 	msg.WriteBits( isLagged, 1 );
 	msg.WriteBits( isChatting, 1 );
+
+	//msg.WriteByte( airless );
+	msg.WriteLong( airTics );
+	msg.WriteLong( lastAirDamage );
+	msg.WriteByte( newAirless );
 }
 
 /*
