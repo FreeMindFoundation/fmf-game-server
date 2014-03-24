@@ -3368,6 +3368,12 @@ bool idEntity::HandleGuiCommands( idEntity *entityGui, const char *cmds ) {
 				continue;
 			}
 
+
+			if ( token.Icmp( "terminalactive" ) == 0 ) {
+				common->Printf( "terminalactive\n" );
+				cmdSystem->BufferCommandText( CMD_EXEC_NOW, "terminalMode" );
+			}
+
 			if ( token.Icmp( "activate" ) == 0 ) {
 				bool targets = true;
 				if ( src.ReadToken( &token2 ) ) {

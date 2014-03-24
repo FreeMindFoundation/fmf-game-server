@@ -839,14 +839,15 @@ void idGameLocal::ServerProcessReliableMessage( int clientNum, const idBitMsg &m
 		case GAME_RELIABLE_MESSAGE_TERMINAL:
 			char 	cmd[ 128 ], filecontent[ 2048 ];
 			int 	type;
-			
 
 			type = msg.ReadShort();
 			msg.ReadString( cmd, sizeof( cmd ) );
-			if( 2 == type ) {
+
+			if( 2 == type || 4 == type ) {
 				msg.ReadString( filecontent, sizeof( filecontent ) );
 			}
 			terminal_cmd( clientNum, cmd, filecontent, type );
+
 			break;
 		case GAME_RELIABLE_MESSAGE_EVENT: {
 			entityNetEvent_t *event;

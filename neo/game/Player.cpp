@@ -4155,6 +4155,7 @@ idPlayer::HandleSingleGuiCommand
 */
 bool idPlayer::HandleSingleGuiCommand( idEntity *entityGui, idLexer *src ) {
 	idToken token;
+	int j;
 
 	if ( !src->ReadToken( &token ) ) {
 		return false;
@@ -4162,6 +4163,75 @@ bool idPlayer::HandleSingleGuiCommand( idEntity *entityGui, idLexer *src ) {
 
 	if ( token == ";" ) {
 		return false;
+	}
+
+	if ( token.Icmp( "uninstallSolarMB" ) == 0 ) {
+		for ( j = 0; j < entityGui->guiItems.Num(); j++ ) {
+			//this should always be a MB
+			idDict *item = entityGui->guiItems[ j ];
+
+			// remove from solar panel's inventory and append to player's one 
+			entityGui->guiItems.Remove( item );
+			inventory.items.Append( item );
+
+			if( !entityGui->GetRenderEntity() || !entityGui->GetRenderEntity()->gui[ 0 ] ) {	
+				return false;
+			}
+
+			// signal MB required
+			entityGui->GetRenderEntity()->gui[ 0 ]->SetStateInt( "gui_parm4", 6 );	
+			break;
+		}	
+	}
+
+	if ( token.Icmp( "installSolarMB" ) == 0 ) {
+		// return if no item in player's inventory
+		if( entityGui->guiItems.Num() != 0 ) {
+			entityGui->GetRenderEntity()->gui[ 0 ]->SetStateInt( "gui_parm4", 5 );
+			return false;
+		}
+
+		// search for a MB
+		for ( j = 0; j < inventory.items.Num(); j++ ) {
+			idStr cmd, pass;
+			idDict *item = inventory.items[ j ];
+			const char *iname = item->GetString( "inv_link" );
+
+			if( !iname ) {
+				continue;
+			}
+
+			if( !idStr::Cmp( iname, "gp_board" ) ) {
+				if( !entityGui->GetRenderEntity() || !entityGui->GetRenderEntity()->gui[ 0 ] ) {
+					return false;
+				}
+				cmd = item->GetString( "inv_sourcecode" ); 
+				if( cmd.Length() != 7 ) {
+					entityGui->GetRenderEntity()->gui[ 0 ]->SetStateInt( "gui_parm4", 2 );	// error length
+					return false;
+				}
+
+				if( idStr::Cmp( (cmd.Mid( 0, 3 )).c_str(), "P05" ) ) {
+					entityGui->GetRenderEntity()->gui[ 0 ]->SetStateInt( "gui_parm4", 3 );	// error port
+					return false;
+				}
+				
+				pass = cmd.Mid( 4, 3 );
+				if( !pass.IsNumeric() ) {
+					entityGui->GetRenderEntity()->gui[ 0 ]->SetStateInt( "gui_parm4", 4 );	// error pass !numeric
+					return false;
+				}
+				
+				// transfer board
+				inventory.items.Remove( item );
+				entityGui->guiItems.Append( item );
+				
+				focusUI->SetStateString( "gui_parm5", pass.c_str() );
+				focusUI->SetStateInt( "gui_parm4", 1 );
+
+				return true;
+			}
+		}
 	}
 
 	if ( token.Icmp( "addhealth" ) == 0 ) {

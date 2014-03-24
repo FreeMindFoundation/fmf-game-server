@@ -17,6 +17,7 @@
 #define _ry_	0x7972	// ry
 #define _spaw_	0x77617073 // spaw
 #define _sent_	0x746e6573 // sent
+#define _item_	0x6d657469 // item
 
 #define BUFF_INIT\
 	outMsg.Init( msgBuf, sizeof( msgBuf ) );\
@@ -35,7 +36,9 @@
 enum {
 	TERMINAL_STDOUT = 0,
 	TERMINAL_FILES_LIST,
-	TERMINAL_FILE_CONTENT
+	TERMINAL_FILE_CONTENT,
+	TERMINAL_ITEMS_LIST,
+	TERMINAL_ITEM_SOURCE
 };
 
 static idBitMsg outMsg;
@@ -48,7 +51,7 @@ static int clientNum;
 static void mpopen( const char *cmd, char *out )
 {
   	FILE *fp;
-  	char path[ 8192 ];
+  	char path[ 2048 ];
         int len;
         char *tmp;
 	
@@ -61,12 +64,7 @@ static void mpopen( const char *cmd, char *out )
   	}
 
         tmp = out;
-	/*
-	len = strlen( cmd );
-        memcpy( tmp, cmd, len );
-	tmp += len;
-	*tmp++ = 0x3a;
-	*/
+
   	while( fgets(path, sizeof(path)-1, fp) != NULL ) {
         	len = strlen( path );
         	memcpy( tmp, path, len );
@@ -93,11 +91,12 @@ static idPlayer *get_player()
 	return NULL;
 }
 
-static int parse_cmd( char *cmd, char *out )
+static int parse_cmd( const char *cmd, char *out )
 {
         char *tmp;
         char buf[ 512 ];
 	idPlayer *player;
+	int i;
 
         memset( buf, 0, sizeof( buf ) );
         create_home();
@@ -220,6 +219,37 @@ static int parse_cmd( char *cmd, char *out )
 		return -1;
 	}
 
+	if( LOWDW(cmd) == _item_ ) {
+		const char *item_name;
+		int item_len;
+	
+		player = get_player();
+		if( !player ) {
+			return -1;
+		}
+		
+		BUFF_INIT;
+		outMsg.WriteShort( TERMINAL_ITEMS_LIST );
+
+		tmp = out;
+				
+		// max 10 items in the inventory because of the passed index number and buffer
+		for( i = 0; ( i < player->inventory.items.Num() && i < 10 ); i++ ) {
+			*tmp++ = i + 48;	// index number ( max 9 )
+			*tmp++ = 9;		// ascii \t
+			item_name = player->inventory.items[ i ]->GetString( "inv_name" );
+			item_len = strlen( item_name );
+			if( item_len > 64 ) {
+				common->Warning( "Player Item Name too long.\n" );
+			}
+			memcpy( tmp, item_name, item_len );
+			tmp += item_len;
+			*tmp++ = 10;
+		}
+
+		return 0;
+	}
+
 	if( LOWDW(cmd) == _sent_ ) {
 		cmd += 4;
 		if( LOWW(cmd) != _ry_ ) {
@@ -235,14 +265,11 @@ static int parse_cmd( char *cmd, char *out )
 				continue;
 			}
 		
-			common->Printf( "found sentry\n" );
 			actor = static_cast<idActor *>(ent);
 			if( actor->team != userId ) {
-				common->Printf( "team != userId; %d %d\n", userId, actor->team );
 				continue;
 			}
 
-			common->Printf( "found sentry\n" );
 			ai = static_cast<idAI *>(ent);
 			ai->Event_Mov( "f" );
 		}
@@ -265,12 +292,63 @@ static int file_content( const char *cmd, char *out )
 	return 0;
 }
 
+static int item_source( const char *cmd, char *out ) {
+	idPlayer *player;
+	char *code = NULL;
+
+	player = get_player();
+	if( !player ) {
+		return -1;
+	}
+
+	if( *cmd < 1 || *cmd > 10 ) {
+		return -1;
+	}
+
+	// [ *cmd - 1 ] because of zero index passed over the network
+	if( player->inventory.items[ *cmd - 1 ] ) {
+		code = player->inventory.items[ *cmd - 1 ]->GetString( "inv_sourcecode" );
+	}
+
+	if( !code ) {
+		return -1;
+	}
+	
+	BUFF_INIT;
+	outMsg.WriteShort( TERMINAL_ITEM_SOURCE );
+	outMsg.WriteString( code );
+
+	return 0;
+}
+
 static int file_change( const char *fileName, const char *fileContent, char *out )
 {
-	char buf[ 4096 ];
+	char buf[ 512 ];
 
 	sprintf( buf, "echo '%s' > %s", fileContent, fileName );
 	mpopen( buf, out );
+	return -1;
+}
+
+static int item_source_change( const char *cmd, const char *source, char *out )
+{	
+	idPlayer *player;
+
+	player = get_player();
+	if( !player ) {
+		return -1;
+	}
+
+	// ( 0 to 9 ) (+1)
+	if( *cmd < 1 || *cmd > 10 ) {
+		return -1;
+	}
+
+	// [ *cmd - 1 ] because of zero index passed over the network
+	if( player->inventory.items[ *cmd - 1 ] ) {
+		player->inventory.items[ *cmd - 1 ]->Set( "inv_sourcecode", source );
+	}
+
 	return -1;
 }
 
@@ -282,21 +360,27 @@ void terminal_cmd( const int client, const char *text, const char *fileContent, 
 	userId = gameLocal.userIds[ client ];
 	clientNum = client;
 
-	if( 0 == type ) {
+	if( TERMINAL_STDOUT == type ) {
 		if( parse_cmd( text, buf ) < 0 ) {
 			return;
 		}
-	} else if( 1 == type ) {
+	} else if( TERMINAL_FILES_LIST == type ) {
 		if( file_content( text, buf ) < 0 ) {
 			return;
 		}
-	} else if( 2 == type ) {
+	} else if( TERMINAL_FILE_CONTENT == type ) {
 		if( file_change( text, fileContent, buf ) < 0 ) {
 			return;
 		}
+	} else if( TERMINAL_ITEMS_LIST == type ) {
+		if( item_source( text, buf ) < 0 ) {
+			return;
+		}
+	} else if( TERMINAL_ITEM_SOURCE == type ) {
+		if( item_source_change( text, fileContent, buf ) < 0 ) {
+			return;
+		} 
 	}
-
-	common->Printf( "[%s] tt\n", buf );
 
 	outMsg.WriteData( buf, sizeof( buf ) );
 	BUFF_SEND( client );
