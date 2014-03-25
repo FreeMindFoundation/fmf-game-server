@@ -187,6 +187,7 @@ enum {
 	
 	OP_BITAND,
 	OP_BITOR,
+	OP_BITXOR,
 
 	OP_BREAK,			// placeholder op.  not used in final code
 	OP_CONTINUE,		// placeholder op.  not used in final code

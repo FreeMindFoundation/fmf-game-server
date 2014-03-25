@@ -3398,7 +3398,6 @@ bool idEntity::HandleGuiCommands( idEntity *entityGui, const char *cmds ) {
 				continue;
 			}
 
-
 			if ( token.Icmp( "runScript" ) == 0 ) {
 				if ( src.ReadToken( &token2 ) ) {
 					while( src.CheckTokenString( "::" ) ) {
@@ -3408,12 +3407,32 @@ bool idEntity::HandleGuiCommands( idEntity *entityGui, const char *cmds ) {
 						}
 						token2 += "::" + token3;
 					}
+					
 					const function_t *func = gameLocal.program.FindFunction( token2 );
 					if ( !func ) {
 						gameLocal.Error( "Can't find function '%s' for gui in entity '%s'", token2.c_str(), entityGui->name.c_str() );
 					} else {
-						idThread *thread = new idThread( func );
-						thread->DelayedStart( 0 );
+						idThread *thread;
+
+						if( func->parmTotal > 0 ) {
+							if ( !src.ReadToken( &token4 ) ) {
+								gameLocal.Error( "Function '%s' requires argument for gui in entity '%s'", token2.c_str(), entityGui->name.c_str() );
+							}
+							// for now just 1 actuall parameter - char[128]
+							char parm[ 128 ];
+							idInterpreter source;
+							
+							memset( parm, 0, sizeof( parm ) );
+							memcpy( parm, token4.c_str(), strlen( token4.c_str() ) );
+
+							source.localstackUsed = sizeof( parm );
+							memcpy( &source.localstack, &parm, sizeof( parm ) );
+							thread = new idThread( &source, func, func->parmTotal );
+							thread->DelayedStart( 0 );						
+						} else {
+							thread = new idThread( func );
+							thread->DelayedStart( 0 );
+						}						
 					}
 				}
 				continue;

@@ -42,7 +42,7 @@ char *idCompiler::punctuation[] = {
 	"+=", "-=", "*=", "/=", "%=", "&=", "|=", "++", "--",
 	"&&", "||", "<=", ">=", "==", "!=", "::", ";",  ",",
 	"~",  "!",  "*",  "/",  "%",  "(",   ")",  "-", "+",
-	"=",  "[",  "]",  ".",  "<",  ">" ,  "&",  "|", ":",  NULL
+	"=",  "[",  "]",  ".",  "<",  ">" ,  "&",  "|", "^", ":",  NULL
 };
 
 opcode_t idCompiler::opcodes[] = {
@@ -194,6 +194,7 @@ opcode_t idCompiler::opcodes[] = {
 	
 	{ "&", "BITAND", 3, false, &def_float, &def_float, &def_float },
 	{ "|", "BITOR", 3, false, &def_float, &def_float, &def_float },
+	{ "^", "BITXOR", 3, false, &def_float, &def_float, &def_float },
 
 	{ "<BREAK>", "BREAK", -1, false, &def_float, &def_void, &def_void },
 	{ "<CONTINUE>", "CONTINUE", -1, false, &def_float, &def_void, &def_void },
@@ -510,6 +511,7 @@ idVarDef *idCompiler::OptimizeOpcode( const opcode_t *op, idVarDef *var_a, idVar
 		case OP_MOD_F:		c._float = (int)*var_a->value.floatPtr % (int)*var_b->value.floatPtr; type = &type_float; break;
 		case OP_BITAND:		c._float = ( int )*var_a->value.floatPtr & ( int )*var_b->value.floatPtr; type = &type_float; break;
 		case OP_BITOR:		c._float = ( int )*var_a->value.floatPtr | ( int )*var_b->value.floatPtr; type = &type_float; break;
+		case OP_BITXOR:		c._float = ( int )*var_a->value.floatPtr ^ ( int )*var_b->value.floatPtr; type = &type_float; break;
 		case OP_GE:			c._float = *var_a->value.floatPtr >= *var_b->value.floatPtr; type = &type_float; break;
 		case OP_LE:			c._float = *var_a->value.floatPtr <= *var_b->value.floatPtr; type = &type_float; break;
 		case OP_GT:			c._float = *var_a->value.floatPtr > *var_b->value.floatPtr; type = &type_float; break;

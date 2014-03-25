@@ -107,10 +107,15 @@ Script_RunScript
 */
 void Script_RunScript(idWindow *window, idList<idGSWinVar> *src) {
 	idWinStr *parm = dynamic_cast<idWinStr*>((*src)[0].var);
+	idWinStr *parm1 = dynamic_cast<idWinStr*>((*src)[1].var);
 	if (parm) {
-		idStr str = window->cmd;
+		idStr str = window->cmd;	
 		str += " ; runScript ";
 		str += parm->c_str();
+		str += " ";
+		if( parm1 ) {
+			str += parm1->c_str();
+		}	
 		window->cmd = str;
 	}
 }
@@ -253,7 +258,7 @@ guiCommandDef_t commandList[] = {
 	{ "resetCinematics", Script_ResetCinematics, 0, 2 },
 	{ "transition", Script_Transition, 4, 6 },
 	{ "localSound", Script_LocalSound, 1, 1 },
-	{ "runScript", Script_RunScript, 1, 1 },
+	{ "runScript", Script_RunScript, 1, 2 },
 	{ "evalRegs", Script_EvalRegs, 0, 0 }
 };
 

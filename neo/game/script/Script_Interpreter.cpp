@@ -1168,6 +1168,13 @@ bool idInterpreter::Execute( void ) {
 			*var_c.floatPtr = static_cast<int>( *var_a.floatPtr ) | static_cast<int>( *var_b.floatPtr );
 			break;
 
+		case OP_BITXOR:
+			var_a = GetVariable( st->a );
+			var_b = GetVariable( st->b );
+			var_c = GetVariable( st->c );
+			*var_c.floatPtr = static_cast<int>( *var_a.floatPtr ) ^ static_cast<int>( *var_b.floatPtr );
+			break;
+
 		case OP_GE:
 			var_a = GetVariable( st->a );
 			var_b = GetVariable( st->b );

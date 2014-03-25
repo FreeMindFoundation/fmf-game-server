@@ -4225,7 +4225,9 @@ bool idPlayer::HandleSingleGuiCommand( idEntity *entityGui, idLexer *src ) {
 				// transfer board
 				inventory.items.Remove( item );
 				entityGui->guiItems.Append( item );
-				
+			
+				common->Printf( "installSolarMB\n" );
+					
 				focusUI->SetStateString( "gui_parm5", pass.c_str() );
 				focusUI->SetStateInt( "gui_parm4", 1 );
 
